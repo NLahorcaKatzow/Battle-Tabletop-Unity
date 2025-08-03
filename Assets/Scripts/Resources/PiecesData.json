@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "name": "piece:pawn",
+    "damage": 1,
+    "health": 5,
+    "movementType": 3,
+    "movementLength": 1,
+    "range": 1,
+    "special": 0
+  },
+  {
+    "id": 2,
+    "name": "piece:tower",
+    "damage": 5,
+    "health": 5,
+    "movementType": 1,
+    "movementLength": 8,
+    "range": 8,
+    "special": 0
+  },
+  {
+    "id": 3,
+    "name": "piece:bishop",
+    "damage": 3,
+    "health": 3,
+    "movementType": 2,
+    "movementLength": 8,
+    "range": 8,
+    "special": 0
+  },
+  {
+    "id": 4,
+    "name": "piece:horse",
+    "damage": 3,
+    "health": 3,
+    "movementType": 4,
+    "movementLength": 3,
+    "range": 3,
+    "special": 0
+  },
+  {
+    "id": 5,
+    "name": "piece:queen",
+    "damage": 9,
+    "health": 9,
+    "movementType": 6,
+    "movementLength": 8,
+    "range": 8,
+    "special": 0
+  },
+  {
+    "id": 6,
+    "name": "piece:king",
+    "damage": 0,
+    "health": 5,
+    "movementType": 5,
+    "movementLength": 1,
+    "range": 1,
+    "special": 1
+  }
+]
