@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using Unity.VisualScripting;
 
 public class PieceDataGO
 {
@@ -39,20 +41,31 @@ public class TabletopController : BaseController{
     private void Update(){
         if (Input.GetMouseButtonDown(0)) // Left mouse button click
         {
+            // Check if click is over UI element
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                //Log("TabletopController", "Click is over UI, ignoring raycast");
+                return;
+            }
+            
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             
             if (Physics.Raycast(ray, out hit, 1000f, LayerMask.GetMask("Piece")))
             {
                 Log("TabletopController", $"Clicked on piece: {hit.collider.name}");
-                // Aquí puedes agregar la lógica para manejar el click en la pieza
-                OnPieceSelected?.Invoke(hit.collider.gameObject.GetInstanceID());
+                if(hit.collider.tag == "Piece") OnPieceSelected?.Invoke(hit.collider.gameObject.GetInstanceID());
+                else if(hit.collider.tag == "ActionCell") tabletopUI.SelectActionCell(hit.collider.gameObject.GetInstanceID());
+            }
+            else 
+            {
+                tabletopUI.HideAll();
             }
         }
     }
-    public PieceController GetPieceController(GameObject go)
+    public PieceController GetPieceController(int id)
     {
-        return currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.go == go).Value.pieceController;
+        return currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.generatedId == id).Value.pieceController;
     }
     
     public Dictionary<int, PieceDataGO> GetCurrentPlayerPieces()
@@ -66,14 +79,24 @@ public class TabletopController : BaseController{
     }
     
     public void ShowPieceInfo(int id){
-        tabletopUI.ShowPieceInfo(GetPieceData(id));
+        tabletopUI.ShowPieceInfo(GetPieceController(id));
         Log("TabletopController", $"Showing piece info: {id}");
     }
     
     public void ShowPieceActions(int id){
-        tabletopUI.ShowPieceActions(GetPieceData(id));
+        tabletopUI.ShowPieceActions(GetPieceController(id));
         Log("TabletopController", $"Showing piece actions: {id}");
     }
+    
+    public bool IsPositionEmpty(Vector2Int position){
+        return currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.GetPosition() == position).Value == null;
+    }
+    
+    public void RecalculatePositions(){
+        //TODO:
+    }
+    
+    
     #region Internal Methods
     internal void ClearTabletop()
     {
@@ -81,6 +104,7 @@ public class TabletopController : BaseController{
             Destroy(piece.Value.go);
         }
         currentPiecesInTabletop.Clear();
+        tabletopUI.HideTabletop();
     }
     #endregion
 

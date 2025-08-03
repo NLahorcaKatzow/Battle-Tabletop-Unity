@@ -1,14 +1,24 @@
 using System.Collections.Generic;
+using System.Linq;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TabletopUI : BaseController
 {
 
     [SerializeField] private GameObject tabletopUI;
+    [SerializeField] private GameObject tabletopGO;
     [SerializeField] private Grid grid;
     [SerializeField] private GameObject piecePrefab;
-
+    [SerializeField] private GameObject actionCellPrefab;
+    [SerializeField] private GameObject pieceInfoPanel;
+    [SerializeField] private GameObject pieceActionsPanel;
+    [SerializeField] private Button moveButton;
+    [SerializeField] private Button attackButton;
+    
+    Dictionary<Vector2Int, GameObject> actionCells = new Dictionary<Vector2Int, GameObject>();
+    [SerializeField] private PieceController currentPiece;
 
     public void InitializateUI(Dictionary<int, Vector2Int> savedPositions)
     {
@@ -27,6 +37,8 @@ public class TabletopUI : BaseController
                 go = pieceGO
             });
         }
+        tabletopUI.SetActive(true);
+        tabletopGO.SetActive(true);
     }
     
     [Button]
@@ -43,16 +55,162 @@ public class TabletopUI : BaseController
         }
     }
 
-    public void ShowPieceInfo(PieceDataClass pieceData){
-    //TODO: Show piece info
+    public void ShowPieceInfo(PieceController pieceController){
+        //TODO: Show piece info
+        pieceInfoPanel.SetActive(true);
     }
     
-    public void ShowPieceActions(PieceDataClass pieceData){
+    public void ShowPieceActions(PieceController pieceController){
+
         //TODO: Show piece actions
+        ClearActionCells();
+        if(pieceController.GetMovementBool() && pieceController.GetAttackBool()) return;
+        pieceActionsPanel.SetActive(true);
         
+        // Convert world position to screen position and move UI
+        Vector3 worldPosition = pieceController.transform.position;
+        Vector3 screenPosition = Camera.main.WorldToScreenPoint(worldPosition);
+        
+        // Get the RectTransform of the pieceActionsPanel
+        RectTransform rectTransform = pieceActionsPanel.GetComponent<RectTransform>();
+        
+        // Set the position of the UI panel to the screen position
+        rectTransform.position = screenPosition;
+        
+        moveButton.onClick.RemoveAllListeners();
+        attackButton.onClick.RemoveAllListeners();
+        moveButton.onClick.AddListener(() => ShowMovementActions(pieceController));
+        attackButton.onClick.AddListener(() => ShowAttackActions(pieceController));
+        
+        if(!pieceController.GetMovementBool()) moveButton.gameObject.SetActive(true);
+        else moveButton.gameObject.SetActive(false);
+        
+        if(!pieceController.GetAttackBool()) attackButton.gameObject.SetActive(true);
+        else attackButton.gameObject.SetActive(false);
     }
 
+    public void HidePieceInfo(){
+        pieceInfoPanel.SetActive(false);
+    }
+    
+    public void HidePieceActions(){
+        pieceActionsPanel.SetActive(false);
+    }
+    
+    public void HideAll(){
+        HidePieceInfo();
+        HidePieceActions();
+        ClearActionCells();
+    }
+    
+    public void HideTabletop(){
+        tabletopUI.SetActive(false);
+        HideAll();
+        tabletopGO.SetActive(false);
+    }
+    
+    
+    public void ShowMovementActions(PieceController pieceController){
+        Debug.Log("ShowMovementActions, movementType: " + pieceController.pieceData.movementType.ToString());
+        currentPiece = pieceController;
+        
+        CalculateMovementActions(pieceController.pieceData.movementType, pieceController.GetPosition(), pieceController.pieceData.movementLength);
+    }
+    
+    public void ShowAttackActions(PieceController pieceController){
+        //TODO: Show attack actions
+        Debug.Log("ShowAttackActions, attackType: " + pieceController.pieceData.movementType.ToString());
+    }
 
+    internal void CalculateMovementActions(MovementType movementType, Vector2Int currentPosition, int movementLength){
+        // Clear previous action cells
+        ClearActionCells();
+        Debug.Log("CalculateMovementActions, movementType: " + movementType.ToString());
+        switch(movementType){
+            case MovementType.KING:
+                CalculateKingMovementActions(currentPosition, movementLength);
+                break;
+            case MovementType.BISHOP:
+                break;
+            case MovementType.TOWER:
+                break;
+            case MovementType.QUEEN:
+                break;
+            case MovementType.PAWN:
+                break;
+            case MovementType.HORSE:
+                break;
+            case MovementType.NONE:
+                break;
+            default:
+                break;
+        }
+    }
+    
+    private void CalculateKingMovementActions(Vector2Int currentPosition, int movementLength)
+    {
+        // King can move in all 8 directions (including diagonals) with movementLength = 1
+        for (int x = -movementLength; x <= movementLength; x++)
+        {
+            for (int z = -movementLength; z <= movementLength; z++)
+            {
+                // Skip the center position (current position)
+                if (x == 0 && z == 0) continue;
+                
+                Vector2Int newPosition = new Vector2Int(currentPosition.x + x, currentPosition.y + z);
+                
+                // Check if position is within board bounds (5x5)
+                if (IsValidPosition(newPosition))
+                {
+                    Vector3 worldPosition = grid.GetCellCenterWorld(new Vector3Int(newPosition.x, 0, newPosition.y));
+                    GameObject actionCell = Instantiate(actionCellPrefab, worldPosition, Quaternion.identity, grid.transform);
+                    actionCells.Add(newPosition, actionCell);
+                    
+                    Log("TabletopUI", $"Created action cell at position: {newPosition}");
+                }
+            }
+        }
+    }
+    
+    public void SelectActionCell(int id){
+        //TODO: Select action cell
+        if(currentPiece == null) return;
+        var newPosition = actionCells.FirstOrDefault(cell => cell.Value.GetInstanceID() == id).Key;
+        currentPiece.SetPosition(newPosition);
+        currentPiece.SetMovementBool(true);
+        currentPiece.MoveToPosition(grid.GetCellCenterWorld(new Vector3Int(newPosition.x, 0, newPosition.y)));
+        currentPiece.Deselect();
+        HideAll();
+        ClearActionCells();
+        
+        TabletopController.Instance.ShowPieceInfo(currentPiece.generatedId);
+        TabletopController.Instance.RecalculatePositions();
+        currentPiece = null;
+    }
+    
+    
+    
+    private bool IsValidPosition(Vector2Int position)
+    {
+        // Check if position is within 5x5 board bounds
+        return position.x >= 0 && 
+        position.x < 5 && 
+        position.y >= 0 && 
+        position.y < 5 && 
+        TabletopController.Instance.IsPositionEmpty(position);
+    }
+    
+    private void ClearActionCells()
+    {
+        foreach (var cell in actionCells)
+        {
+            if (cell.Value != null)
+            {
+                Destroy(cell.Value);
+            }
+        }
+        actionCells.Clear();
+    }
 
 
 

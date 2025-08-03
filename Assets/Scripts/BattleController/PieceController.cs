@@ -7,6 +7,13 @@ public class PieceController : MonoBehaviour
     public int generatedId;
     public PieceDataClass pieceData;
     public Vector2Int position;
+    public GameObject selectedHalo;
+
+    public bool isSelected = false;
+    public bool isMoving = false;
+    public bool isAttacking = false;
+    public bool isEnemy = false;
+
 
     private void Awake()
     {
@@ -34,7 +41,12 @@ public class PieceController : MonoBehaviour
         return position;
     }
 
-
+    public void MoveToPosition(Vector3 newPosition)
+    {
+        transform.DOMove(newPosition, 0.5f).SetEase(Ease.InOutSine).OnComplete(() => {
+            Deselect();
+        });
+    }
 
     public void Selected(int id)
     {
@@ -43,7 +55,9 @@ public class PieceController : MonoBehaviour
             Deselect();
             return;
         }
+        isSelected = true;
         Debug.Log($"Selected piece: {pieceData.name}");
+        selectedHalo.SetActive(true);
         transform.DOPunchScale(new Vector3(0.1f, 0.1f, 0.1f), 0.5f);
         TabletopController.Instance.ShowPieceInfo(generatedId);
         TabletopController.Instance.ShowPieceActions(generatedId);
@@ -51,6 +65,41 @@ public class PieceController : MonoBehaviour
 
     public void Deselect()
     {
-        Debug.Log($"Unselected piece: {pieceData.name}");
+        if (isSelected)
+        {
+            Debug.Log($"Unselected piece: {pieceData.name}");
+            //TODO: Deseleccionar la pieza si estaba seleccionada
+        }
+        isSelected = false;
+        selectedHalo.SetActive(false);
+    }
+    
+    public void SetMovementBool(bool value)
+    {
+        isMoving = value;
+    }
+    
+    public void SetAttackBool(bool value)
+    {
+        isAttacking = value;
+    }
+    public void SetEnemyBool(bool value)
+    {
+        isEnemy = value;
+    }
+    
+    public bool GetMovementBool()
+    {
+        return isMoving;
+    }
+    
+    public bool GetAttackBool()
+    {
+        return isAttacking;
+    }
+    
+    public bool GetEnemyBool()
+    {
+        return isEnemy;
     }
 }
