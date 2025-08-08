@@ -74,6 +74,25 @@ public class PieceController : MonoBehaviour
         selectedHalo.SetActive(false);
     }
     
+    
+    public void ApplyDamage(int damage)
+    {
+        pieceData.health -= damage;
+        if(pieceData.health <= 0)
+        {
+            DestroyPiece();
+        }
+    }
+    
+    public void DestroyPiece()
+    {
+        Debug.Log($"Destroying piece: {pieceData.name}");
+        transform.DOScale(0, 0.5f).SetEase(Ease.InOutSine).OnComplete(() => {
+            TabletopController.Instance.DestroyPiece(generatedId);
+        });
+    }
+    
+    
     public void SetMovementBool(bool value)
     {
         isMoving = value;

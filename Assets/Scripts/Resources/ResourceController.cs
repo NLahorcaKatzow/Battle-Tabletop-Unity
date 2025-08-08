@@ -12,6 +12,7 @@ public class ResourceController : MonoBehaviour
     [ShowInInspector]public List<PieceDataClass> piecesData;
     [ShowInInspector]public List<SavedPosition> savedPositions;
     public event Action OnCompleteResourcesLoaded;
+    public bool IsReady { get; private set; }
     private void Awake()
     {
         Instance = this;
@@ -30,7 +31,9 @@ public class ResourceController : MonoBehaviour
             savedPositions = new List<SavedPosition>();
             LoadPiecesData();
             LoadSavedPositions();
+            IsReady = true;
             OnCompleteResourcesLoaded?.Invoke();
+            Debug.Log("Resources loaded");
         }
         catch(Exception e){
             Debug.LogError($"ResourceController Error: {e.Message}\nStackTrace: {e.StackTrace}");

@@ -16,8 +16,9 @@ public class TabletopUI : BaseController
     [SerializeField] private GameObject pieceActionsPanel;
     [SerializeField] private Button moveButton;
     [SerializeField] private Button attackButton;
-    
+    [SerializeField] private GameObject attackCellPrefab;
     Dictionary<Vector2Int, GameObject> actionCells = new Dictionary<Vector2Int, GameObject>();
+    Dictionary<Vector2Int, GameObject> attackCells = new Dictionary<Vector2Int, GameObject>();
     [SerializeField] private PieceController currentPiece;
 
     public void InitializateUI(Dictionary<int, Vector2Int> savedPositions)
@@ -114,21 +115,23 @@ public class TabletopUI : BaseController
         Debug.Log("ShowMovementActions, movementType: " + pieceController.pieceData.movementType.ToString());
         currentPiece = pieceController;
         
-        CalculateMovementActions(pieceController.pieceData.movementType, pieceController.GetPosition(), pieceController.pieceData.movementLength);
+        CalculateActions(pieceController.pieceData.movementType, pieceController.GetPosition(), pieceController.pieceData.movementLength);
     }
     
     public void ShowAttackActions(PieceController pieceController){
         //TODO: Show attack actions
         Debug.Log("ShowAttackActions, attackType: " + pieceController.pieceData.movementType.ToString());
+        currentPiece = pieceController;
+        CalculateActions(pieceController.pieceData.movementType, pieceController.GetPosition(), pieceController.pieceData.movementLength, true);
     }
 
-    internal void CalculateMovementActions(MovementType movementType, Vector2Int currentPosition, int movementLength){
+    internal void CalculateActions(MovementType movementType, Vector2Int currentPosition, int movementLength, bool isAttack = false){
         // Clear previous action cells
         ClearActionCells();
         Debug.Log("CalculateMovementActions, movementType: " + movementType.ToString());
         switch(movementType){
             case MovementType.KING:
-                CalculateKingMovementActions(currentPosition, movementLength);
+                CalculateKingMovementActions(currentPosition, movementLength, isAttack);
                 break;
             case MovementType.BISHOP:
                 break;
@@ -147,7 +150,7 @@ public class TabletopUI : BaseController
         }
     }
     
-    private void CalculateKingMovementActions(Vector2Int currentPosition, int movementLength)
+    private void CalculateKingMovementActions(Vector2Int currentPosition, int movementLength, bool isAttack = false)
     {
         // King can move in all 8 directions (including diagonals) with movementLength = 1
         for (int x = -movementLength; x <= movementLength; x++)
@@ -163,8 +166,15 @@ public class TabletopUI : BaseController
                 if (IsValidPosition(newPosition))
                 {
                     Vector3 worldPosition = grid.GetCellCenterWorld(new Vector3Int(newPosition.x, 0, newPosition.y));
-                    GameObject actionCell = Instantiate(actionCellPrefab, worldPosition, Quaternion.identity, grid.transform);
-                    actionCells.Add(newPosition, actionCell);
+                    GameObject actionCell;
+                    if(isAttack) {
+                        actionCell = Instantiate(attackCellPrefab, worldPosition, Quaternion.identity, grid.transform);
+                        attackCells.Add(newPosition, actionCell);
+                    }
+                    else {
+                        actionCell = Instantiate(actionCellPrefab, worldPosition, Quaternion.identity, grid.transform);
+                        actionCells.Add(newPosition, actionCell);
+                    }
                     
                     Log("TabletopUI", $"Created action cell at position: {newPosition}");
                 }
@@ -188,7 +198,18 @@ public class TabletopUI : BaseController
         currentPiece = null;
     }
     
-    
+    public void SelectAttackCell(int id){
+        //TODO: Select attack cell
+        if(currentPiece == null) return;
+        var newPosition = attackCells.FirstOrDefault(cell => cell.Value.GetInstanceID() == id).Key;
+        currentPiece.SetAttackBool(true);
+        currentPiece.Deselect();
+        HideAll();
+        ClearActionCells();
+        
+        TabletopController.Instance.AttackPiece(newPosition.x, newPosition.y, currentPiece.pieceData.damage);
+        currentPiece = null;
+    }
     
     private bool IsValidPosition(Vector2Int position)
     {

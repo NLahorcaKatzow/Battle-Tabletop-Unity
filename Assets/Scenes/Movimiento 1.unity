@@ -731,6 +731,7 @@ MonoBehaviour:
   pieceActionsPanel: {fileID: 637660030}
   moveButton: {fileID: 753100305}
   attackButton: {fileID: 1789958634}
+  currentPiece: {fileID: 0}
 --- !u!1 &891412732
 GameObject:
   m_ObjectHideFlags: 0

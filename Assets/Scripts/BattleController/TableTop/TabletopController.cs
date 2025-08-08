@@ -56,6 +56,7 @@ public class TabletopController : BaseController{
                 Log("TabletopController", $"Clicked on piece: {hit.collider.name}");
                 if(hit.collider.tag == "Piece") OnPieceSelected?.Invoke(hit.collider.gameObject.GetInstanceID());
                 else if(hit.collider.tag == "ActionCell") tabletopUI.SelectActionCell(hit.collider.gameObject.GetInstanceID());
+                else if(hit.collider.tag == "AttackCell") tabletopUI.SelectAttackCell(hit.collider.gameObject.GetInstanceID());
             }
             else 
             {
@@ -91,6 +92,29 @@ public class TabletopController : BaseController{
     public bool IsPositionEmpty(Vector2Int position){
         return currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.GetPosition() == position).Value == null;
     }
+    
+    
+    
+    public void AttackPiece(int x, int y, int damage){
+        //TODO: ataque a un espacio
+        //TODO: obtener una pieza por su posicion en x,y
+        var piece = currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.GetPosition() == new Vector2Int(x, y)).Value.pieceController;
+        //TODO: quitar vida a la pieza
+        Log("TabletopController", $"Attacking piece at: {x}, {y}");
+        if(piece != null){
+            piece.ApplyDamage(damage);
+        }
+    }
+    
+    public void DestroyPiece(int id){
+        var piece = currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.generatedId == id).Value;
+        if(piece != null){
+            piece.pieceController.DestroyPiece();
+            currentPiecesInTabletop.Remove(id);
+            Destroy(piece.go);
+        }
+    }
+    
     
     public void RecalculatePositions(){
         //TODO:
