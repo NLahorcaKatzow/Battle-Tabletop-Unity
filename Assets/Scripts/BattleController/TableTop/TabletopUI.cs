@@ -21,21 +21,31 @@ public class TabletopUI : BaseController
     Dictionary<Vector2Int, GameObject> attackCells = new Dictionary<Vector2Int, GameObject>();
     [SerializeField] private PieceController currentPiece;
 
-    public void InitializateUI(Dictionary<int, Vector2Int> savedPositions)
+    public void InitializateUI(Dictionary<int, SavedPosition> savedPositions, Dictionary<int, SavedPosition> enemyPositions)
     {
-        foreach (var piece in ResourceController.Instance.piecesData)
-        {
-            if (!savedPositions.ContainsKey(piece.id)) continue;
-            Log("TabletopController", "Instantiating piece: " + piece.id);
-            Vector3 position = grid.GetCellCenterWorld(new Vector3Int(savedPositions[piece.id].x, 0, savedPositions[piece.id].y));
-            var pieceGO = Instantiate(piecePrefab, position, Quaternion.identity, grid.transform);
-            var pieceController = pieceGO.GetComponent<PieceController>();
-            pieceController.SetPieceData(piece);
-            pieceController.SetPosition(savedPositions[piece.id]);
-            TabletopController.Instance.GetCurrentPlayerPieces().Add(piece.id, new PieceDataGO
+        foreach(var savedPosition in savedPositions){
+            if(TabletopController.Instance.GetCurrentPlayerPieces().ContainsKey(savedPosition.Key)) continue;
+            Log("TabletopController", "Instantiating piece: " + savedPosition.Key);
+            var piece = Instantiate(piecePrefab, grid.GetCellCenterWorld(new Vector3Int(savedPosition.Value.x, 0, savedPosition.Value.y)), Quaternion.identity, grid.transform);
+            piece.GetComponent<PieceController>().SetPieceData(ResourceController.Instance.GetPieceDatabyId(savedPosition.Value.type));
+            piece.GetComponent<PieceController>().SetPosition(new Vector2Int(savedPosition.Value.x, savedPosition.Value.y));
+            TabletopController.Instance.GetCurrentPlayerPieces().Add(savedPosition.Key, new PieceDataGO
             {
-                pieceController = pieceController,
-                go = pieceGO
+                pieceController = piece.GetComponent<PieceController>(),
+                go = piece
+            });
+        }
+    
+        foreach(var enemyPosition in enemyPositions){
+            if(TabletopController.Instance.GetCurrentPlayerPieces().ContainsKey(enemyPosition.Key)) continue;
+            Log("TabletopController", "Instantiating enemy piece: " + enemyPosition.Key);
+            var enemyPiece = Instantiate(piecePrefab, grid.GetCellCenterWorld(new Vector3Int(enemyPosition.Value.x, 0, enemyPosition.Value.y)), Quaternion.identity, grid.transform);
+            enemyPiece.GetComponent<PieceController>().SetPieceData(ResourceController.Instance.GetPieceDatabyId(enemyPosition.Value.type), true);
+            enemyPiece.GetComponent<PieceController>().SetPosition(new Vector2Int(enemyPosition.Value.x, enemyPosition.Value.y));
+            TabletopController.Instance.GetCurrentPlayerPieces().Add(enemyPosition.Key, new PieceDataGO
+            {
+                pieceController = enemyPiece.GetComponent<PieceController>(),
+                go = enemyPiece
             });
         }
         tabletopUI.SetActive(true);
@@ -102,6 +112,7 @@ public class TabletopUI : BaseController
         HidePieceInfo();
         HidePieceActions();
         ClearActionCells();
+        ClearAttackCells();
     }
     
     public void HideTabletop(){
@@ -205,20 +216,20 @@ public class TabletopUI : BaseController
         currentPiece.SetAttackBool(true);
         currentPiece.Deselect();
         HideAll();
-        ClearActionCells();
-        
+        ClearAttackCells();
         TabletopController.Instance.AttackPiece(newPosition.x, newPosition.y, currentPiece.pieceData.damage);
         currentPiece = null;
     }
     
-    private bool IsValidPosition(Vector2Int position)
+    private bool IsValidPosition(Vector2Int position, bool isAttack = false)
     {
         // Check if position is within 5x5 board bounds
+        
         return position.x >= 0 && 
         position.x < 5 && 
         position.y >= 0 && 
         position.y < 5 && 
-        TabletopController.Instance.IsPositionEmpty(position);
+        (TabletopController.Instance.IsPositionEmpty(position) || isAttack);
     }
     
     private void ClearActionCells()
@@ -232,8 +243,18 @@ public class TabletopUI : BaseController
         }
         actionCells.Clear();
     }
-
-
+    
+    private void ClearAttackCells()
+    {
+        foreach (var cell in attackCells)
+        {
+            if (cell.Value != null)
+            {   
+                Destroy(cell.Value);
+            }
+        }
+        attackCells.Clear();
+    }
 
 
 

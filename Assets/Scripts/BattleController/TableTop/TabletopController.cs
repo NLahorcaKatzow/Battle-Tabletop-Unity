@@ -34,8 +34,9 @@ public class TabletopController : BaseController{
         Log("TabletopController", "Initializated");
         Log("TabletopController", ResourceController.Instance.piecesData);
         currentPiecesInTabletop = new Dictionary<int, PieceDataGO>();
-        Dictionary<int, Vector2Int> savedPositions = ResourceController.Instance.GetSavedPositions();
-        tabletopUI.InitializateUI(savedPositions);
+        Dictionary<int, SavedPosition> savedPositions = ResourceController.Instance.GetSavedPositions();
+        Dictionary<int, SavedPosition> enemyPositions = ResourceController.Instance.GetEnemyPositions();
+        tabletopUI.InitializateUI(savedPositions, enemyPositions);
     }
     
     private void Update(){
@@ -98,12 +99,15 @@ public class TabletopController : BaseController{
     public void AttackPiece(int x, int y, int damage){
         //TODO: ataque a un espacio
         //TODO: obtener una pieza por su posicion en x,y
-        var piece = currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.GetPosition() == new Vector2Int(x, y)).Value.pieceController;
+        var piece = currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.GetPosition() == new Vector2Int(x, y));
+        if(piece.Value == null) {
+            Log("TabletopController", $"No piece found at: {x}, {y}");
+            
+            return;
+        }
         //TODO: quitar vida a la pieza
         Log("TabletopController", $"Attacking piece at: {x}, {y}");
-        if(piece != null){
-            piece.ApplyDamage(damage);
-        }
+        piece.Value.pieceController.ApplyDamage(damage);
     }
     
     public void DestroyPiece(int id){

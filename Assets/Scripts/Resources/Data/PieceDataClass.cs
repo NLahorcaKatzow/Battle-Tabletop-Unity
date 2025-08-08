@@ -4,6 +4,7 @@ public class PieceDataClass
     public string name;
     public int damage;
     public int health;
+    public int maxHealth;
     public MovementType movementType;
     public int movementLength;
     public int range; //0 = melee, 1 = range

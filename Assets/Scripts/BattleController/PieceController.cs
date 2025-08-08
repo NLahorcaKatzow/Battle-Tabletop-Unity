@@ -1,6 +1,7 @@
 using DG.Tweening;
 using Unity.Android.Gradle.Manifest;
 using UnityEngine;
+using DamageNumbersPro;
 
 public class PieceController : MonoBehaviour
 {
@@ -8,6 +9,8 @@ public class PieceController : MonoBehaviour
     public PieceDataClass pieceData;
     public Vector2Int position;
     public GameObject selectedHalo;
+    public TimedSliderUI damageSlider;
+    public DamageNumber damageNumberPrefab;
 
     public bool isSelected = false;
     public bool isMoving = false;
@@ -25,10 +28,11 @@ public class PieceController : MonoBehaviour
         TabletopController.Instance.OnPieceSelected -= Selected;
     }
 
-    public void SetPieceData(PieceDataClass data)
+    public void SetPieceData(PieceDataClass data, bool isEnemy = false)
     {
         generatedId = gameObject.GetInstanceID();
         pieceData = data;
+        this.isEnemy = isEnemy;
     }
 
     public void SetPosition(Vector2Int pos)
@@ -43,7 +47,8 @@ public class PieceController : MonoBehaviour
 
     public void MoveToPosition(Vector3 newPosition)
     {
-        transform.DOMove(newPosition, 0.5f).SetEase(Ease.InOutSine).OnComplete(() => {
+        transform.DOMove(newPosition, 0.5f).SetEase(Ease.InOutSine).OnComplete(() =>
+        {
             Deselect();
         });
     }
@@ -60,7 +65,7 @@ public class PieceController : MonoBehaviour
         selectedHalo.SetActive(true);
         transform.DOPunchScale(new Vector3(0.1f, 0.1f, 0.1f), 0.5f);
         TabletopController.Instance.ShowPieceInfo(generatedId);
-        TabletopController.Instance.ShowPieceActions(generatedId);
+        if (!isEnemy) TabletopController.Instance.ShowPieceActions(generatedId);
     }
 
     public void Deselect()
@@ -73,31 +78,35 @@ public class PieceController : MonoBehaviour
         isSelected = false;
         selectedHalo.SetActive(false);
     }
-    
-    
+
+
     public void ApplyDamage(int damage)
     {
+        damageSlider.Spawn(Camera.main.WorldToScreenPoint(transform.position), 0.5f, (pieceData.health)/pieceData.maxHealth, (pieceData.health - damage)/pieceData.maxHealth, Ease.OutSine);
+        damageNumberPrefab.Spawn(Camera.main.WorldToScreenPoint(transform.position), damage);
         pieceData.health -= damage;
-        if(pieceData.health <= 0)
+        if (pieceData.health <= 0)
         {
             DestroyPiece();
         }
+
     }
-    
+
     public void DestroyPiece()
     {
         Debug.Log($"Destroying piece: {pieceData.name}");
-        transform.DOScale(0, 0.5f).SetEase(Ease.InOutSine).OnComplete(() => {
+        transform.DOScale(0, 0.5f).SetEase(Ease.InOutSine).OnComplete(() =>
+        {
             TabletopController.Instance.DestroyPiece(generatedId);
         });
     }
-    
-    
+
+
     public void SetMovementBool(bool value)
     {
         isMoving = value;
     }
-    
+
     public void SetAttackBool(bool value)
     {
         isAttacking = value;
@@ -106,17 +115,17 @@ public class PieceController : MonoBehaviour
     {
         isEnemy = value;
     }
-    
+
     public bool GetMovementBool()
     {
         return isMoving;
     }
-    
+
     public bool GetAttackBool()
     {
         return isAttacking;
     }
-    
+
     public bool GetEnemyBool()
     {
         return isEnemy;

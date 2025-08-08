@@ -11,6 +11,8 @@ public class ResourceController : MonoBehaviour
     [SerializeField] private bool logs;
     [ShowInInspector]public List<PieceDataClass> piecesData;
     [ShowInInspector]public List<SavedPosition> savedPositions;
+    [ShowInInspector] public List<SavedPosition> enemyPositions;
+    [SerializeField] private string enemyPositionsPresetResourcePath = "Data/EnemyPositionsPreset1";
     public event Action OnCompleteResourcesLoaded;
     public bool IsReady { get; private set; }
     private void Awake()
@@ -29,8 +31,10 @@ public class ResourceController : MonoBehaviour
         try{
             piecesData = new List<PieceDataClass>();
             savedPositions = new List<SavedPosition>();
+            enemyPositions = new List<SavedPosition>();
             LoadPiecesData();
             LoadSavedPositions();
+            LoadEnemyPositions();
             IsReady = true;
             OnCompleteResourcesLoaded?.Invoke();
             Debug.Log("Resources loaded");
@@ -43,15 +47,19 @@ public class ResourceController : MonoBehaviour
     public PieceDataClass GetPieceDatabyId(int id)
     {
         return piecesData.FirstOrDefault(piece => piece.id == id);
+    }    
+    public PieceDataClass GetPieceDatabyId(MovementType type)
+    {
+        return piecesData.FirstOrDefault(piece => piece.movementType == type);
     }
     
-    public Dictionary<int, Vector2Int> GetSavedPositions()
+    public Dictionary<int, SavedPosition> GetSavedPositions()
     {
-        Dictionary<int, Vector2Int> savedPositionsDict = new Dictionary<int, Vector2Int>();
+        Dictionary<int, SavedPosition> savedPositionsDict = new Dictionary<int, SavedPosition>();
         foreach(var position in savedPositions){
             if (!savedPositionsDict.ContainsKey(position.id))
             {
-                savedPositionsDict.Add(position.id, new Vector2Int(position.x, position.y));
+                savedPositionsDict.Add(position.id, position);
             }
             else
             {
@@ -59,6 +67,23 @@ public class ResourceController : MonoBehaviour
             }
         }
         return savedPositionsDict;
+    }
+
+    public Dictionary<int, SavedPosition> GetEnemyPositions()
+    {
+        Dictionary<int, SavedPosition> enemyPositionsDict = new Dictionary<int, SavedPosition>();
+        foreach (var position in enemyPositions)
+        {
+            if (!enemyPositionsDict.ContainsKey(position.id))
+            {
+                enemyPositionsDict.Add(position.id, position);
+            }
+            else
+            {
+                Debug.LogWarning($"Duplicate enemy key found: {position.id}. Skipping duplicate entry.");
+            }
+        }
+        return enemyPositionsDict;
     }
     
     #region Internal Methods
@@ -78,6 +103,20 @@ public class ResourceController : MonoBehaviour
         savedPositions = JsonConvert.DeserializeObject<List<SavedPosition>>(json);
         Debug.Log("SavedPositions loaded");
         Debug.Log(JsonConvert.SerializeObject(savedPositions));
+    }
+
+    private void LoadEnemyPositions()
+    {
+        var textAsset = Resources.Load<TextAsset>(enemyPositionsPresetResourcePath);
+        if (textAsset == null)
+        {
+            Debug.LogError($"Enemy positions preset not found at '{enemyPositionsPresetResourcePath}'.");
+            enemyPositions = new List<SavedPosition>();
+            return;
+        }
+        enemyPositions = JsonConvert.DeserializeObject<List<SavedPosition>>(textAsset.text);
+        Debug.Log($"EnemyPositions loaded from {enemyPositionsPresetResourcePath}");
+        Debug.Log(JsonConvert.SerializeObject(enemyPositions));
     }
     
     #endregion
