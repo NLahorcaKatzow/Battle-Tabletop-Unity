@@ -12,6 +12,7 @@ public class ResourceController : MonoBehaviour
     [ShowInInspector]public List<PieceDataClass> piecesData;
     [ShowInInspector]public List<SavedPosition> savedPositions;
     [ShowInInspector] public List<SavedPosition> enemyPositions;
+    [ShowInInspector] public GameConfigs gameConfigs;
     [SerializeField] private string enemyPositionsPresetResourcePath = "Data/EnemyPositionsPreset1";
     public event Action OnCompleteResourcesLoaded;
     public bool IsReady { get; private set; }
@@ -35,6 +36,7 @@ public class ResourceController : MonoBehaviour
             LoadPiecesData();
             LoadSavedPositions();
             LoadEnemyPositions();
+            LoadGameConfigs();
             IsReady = true;
             OnCompleteResourcesLoaded?.Invoke();
             Debug.Log("Resources loaded");
@@ -86,6 +88,11 @@ public class ResourceController : MonoBehaviour
         return enemyPositionsDict;
     }
     
+    public GameConfigs GetGameConfigs()
+    {
+        return gameConfigs;
+    }
+    
     #region Internal Methods
 
     private void LoadPiecesData()
@@ -117,6 +124,14 @@ public class ResourceController : MonoBehaviour
         enemyPositions = JsonConvert.DeserializeObject<List<SavedPosition>>(textAsset.text);
         Debug.Log($"EnemyPositions loaded from {enemyPositionsPresetResourcePath}");
         Debug.Log(JsonConvert.SerializeObject(enemyPositions));
+    }
+
+    private void LoadGameConfigs()
+    {
+        string json = Resources.Load<TextAsset>("GameConfigs").text;
+        gameConfigs = JsonConvert.DeserializeObject<GameConfigs>(json);
+        Debug.Log("GameConfigs loaded");
+        Debug.Log(JsonConvert.SerializeObject(gameConfigs));
     }
     
     #endregion

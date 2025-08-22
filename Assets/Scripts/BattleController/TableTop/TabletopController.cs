@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using Unity.VisualScripting;
+using Sirenix.OdinInspector;
 
 public class PieceDataGO
 {
@@ -13,33 +14,37 @@ public class PieceDataGO
     public GameObject go;
 }
 
-public class TabletopController : BaseController{
+public class TabletopController : MonoBehaviour
+{
     public static TabletopController Instance { get; private set; }
 
 
     [SerializeField] private Dictionary<int, PieceDataGO> currentPiecesInTabletop;
     [SerializeField] private TabletopUI tabletopUI;
-    
+
     public delegate void PieceSelected(int id);
     public event PieceSelected OnPieceSelected;
 
     //guardado de posiciones
     // calculo de movimiento
-    private void Awake(){
+    private void Awake()
+    {
         Instance = this;
     }
 
-    public override void Initializate()
+    public void Initializate()
     {
-        Log("TabletopController", "Initializated");
-        Log("TabletopController", ResourceController.Instance.piecesData);
+        Debug.Log("TabletopController: Initializated");
+        Debug.Log("TabletopController: " + ResourceController.Instance.piecesData);
         currentPiecesInTabletop = new Dictionary<int, PieceDataGO>();
         Dictionary<int, SavedPosition> savedPositions = ResourceController.Instance.GetSavedPositions();
         Dictionary<int, SavedPosition> enemyPositions = ResourceController.Instance.GetEnemyPositions();
         tabletopUI.InitializateUI(savedPositions, enemyPositions);
     }
     
-    private void Update(){
+
+    private void Update()
+    {
         if (Input.GetMouseButtonDown(0)) // Left mouse button click
         {
             // Check if click is over UI element
@@ -48,20 +53,21 @@ public class TabletopController : BaseController{
                 //Log("TabletopController", "Click is over UI, ignoring raycast");
                 return;
             }
-            
+
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
-            
+
             if (Physics.Raycast(ray, out hit, 1000f, LayerMask.GetMask("Piece")))
             {
-                Log("TabletopController", $"Clicked on piece: {hit.collider.name}");
-                if(hit.collider.tag == "Piece") OnPieceSelected?.Invoke(hit.collider.gameObject.GetInstanceID());
-                else if(hit.collider.tag == "ActionCell") tabletopUI.SelectActionCell(hit.collider.gameObject.GetInstanceID());
-                else if(hit.collider.tag == "AttackCell") tabletopUI.SelectAttackCell(hit.collider.gameObject.GetInstanceID());
+                Debug.Log("TabletopController: Clicked on piece: " + hit.collider.name);
+                if (hit.collider.tag == "Piece") OnPieceSelected?.Invoke(hit.collider.gameObject.GetInstanceID());
+                else if (hit.collider.tag == "ActionCell") tabletopUI.SelectActionCell(hit.collider.gameObject.GetInstanceID());
+                else if (hit.collider.tag == "AttackCell") tabletopUI.SelectAttackCell(hit.collider.gameObject.GetInstanceID());
             }
-            else 
+            else
             {
                 tabletopUI.HideAll();
+                SetAllPiecesTangible();
             }
         }
     }
@@ -69,78 +75,100 @@ public class TabletopController : BaseController{
     {
         return currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.generatedId == id).Value.pieceController;
     }
-    
+
     public Dictionary<int, PieceDataGO> GetCurrentPlayerPieces()
     {
         return currentPiecesInTabletop;
     }
-    
+
     public PieceDataClass GetPieceData(int id)
     {
         return currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.generatedId == id).Value.pieceController.pieceData;
     }
-    
-    public void ShowPieceInfo(int id){
+
+    public void ShowPieceInfo(int id)
+    {
         tabletopUI.ShowPieceInfo(GetPieceController(id));
-        Log("TabletopController", $"Showing piece info: {id}");
+        Debug.Log("TabletopController: Showing piece info: " + id);
     }
-    
-    public void ShowPieceActions(int id){
+
+    public void ShowPieceActions(int id)
+    {
         tabletopUI.ShowPieceActions(GetPieceController(id));
-        Log("TabletopController", $"Showing piece actions: {id}");
+        Debug.Log("TabletopController: Showing piece actions: " + id);
     }
-    
-    public bool IsPositionEmpty(Vector2Int position){
+
+    public bool IsPositionEmpty(Vector2Int position)
+    {
         return currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.GetPosition() == position).Value == null;
     }
-    
-    
-    
-    public void AttackPiece(int x, int y, int damage){
+
+
+
+    public void AttackPiece(int x, int y, int damage)
+    {
         //TODO: ataque a un espacio
         //TODO: obtener una pieza por su posicion en x,y
         var piece = currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.GetPosition() == new Vector2Int(x, y));
-        if(piece.Value == null) {
-            Log("TabletopController", $"No piece found at: {x}, {y}");
-            
+        if (piece.Value == null)
+        {
+            Debug.Log("TabletopController: No piece found at: " + x + ", " + y);
+
             return;
         }
         //TODO: quitar vida a la pieza
-        Log("TabletopController", $"Attacking piece at: {x}, {y}");
+        Debug.Log("TabletopController: Attacking piece at: " + x + ", " + y);
         piece.Value.pieceController.ApplyDamage(damage);
     }
-    
-    public void DestroyPiece(int id){
+    [Button]
+    public void DestroyPiece(int id)
+    {
+        Debug.Log("TabletopController: Destroying piece: " + id);
         var piece = currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.generatedId == id).Value;
-        if(piece != null){
-            piece.pieceController.DestroyPiece();
-            currentPiecesInTabletop.Remove(id);
-            Destroy(piece.go);
+        if (piece == null) 
+        {
+            Debug.Log("TabletopController: Piece " + id + " not found");
+            return;
         }
+        piece.pieceController.DestroyPiece();
     }
-    
-    public void SetAllPiecesIntangible(int currentPieceId){
-        foreach(var piece in currentPiecesInTabletop){
-            if(piece.Value.pieceController.generatedId == currentPieceId) continue;
+    [Button]
+    public void RevivePiece(int id)
+    {
+        //TODO: Revivir pieza, seteo de nueva posicion
+        Debug.Log("TabletopController: Reviving piece: " + id);
+        var piece = currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.generatedId == id).Value;
+        piece.pieceController.RevivePiece();
+    }
+
+    public void SetAllPiecesIntangible(int currentPieceId)
+    {
+        foreach (var piece in currentPiecesInTabletop)
+        {
+            if (piece.Value.pieceController.generatedId == currentPieceId || piece.Value.pieceController.isDead) continue;
             piece.Value.go.layer = LayerMask.NameToLayer("Ignore Raycast");
         }
     }
-    public void SetAllPiecesTangible(){
-        foreach(var piece in currentPiecesInTabletop){
+    public void SetAllPiecesTangible()
+    {
+        foreach (var piece in currentPiecesInTabletop)
+        {
             piece.Value.go.layer = LayerMask.NameToLayer("Piece");
         }
     }
-    
-    
-    public void RecalculatePositions(){
+
+
+    public void RecalculatePositions()
+    {
         //TODO:
     }
-    
-    
+
+
     #region Internal Methods
     internal void ClearTabletop()
     {
-        foreach(var piece in currentPiecesInTabletop){
+        foreach (var piece in currentPiecesInTabletop)
+        {
             Destroy(piece.Value.go);
         }
         currentPiecesInTabletop.Clear();

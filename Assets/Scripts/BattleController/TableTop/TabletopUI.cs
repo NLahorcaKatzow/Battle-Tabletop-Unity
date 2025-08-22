@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Sirenix.OdinInspector;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,6 +18,8 @@ public class TabletopUI : BaseController
     [SerializeField] private Button moveButton;
     [SerializeField] private Button attackButton;
     [SerializeField] private GameObject attackCellPrefab;
+    [SerializeField] private GameObject timerGO;
+    [SerializeField] private Timer timerComponent;
     Dictionary<Vector2Int, GameObject> actionCells = new Dictionary<Vector2Int, GameObject>();
     Dictionary<Vector2Int, GameObject> attackCells = new Dictionary<Vector2Int, GameObject>();
     [SerializeField] private PieceController currentPiece;
@@ -50,6 +53,7 @@ public class TabletopUI : BaseController
         }
         tabletopUI.SetActive(true);
         tabletopGO.SetActive(true);
+        InitializeTimer();
     }
     
     [Button]
@@ -125,12 +129,13 @@ public class TabletopUI : BaseController
     public void ShowMovementActions(PieceController pieceController){
         Debug.Log("ShowMovementActions, movementType: " + pieceController.pieceData.movementType.ToString());
         currentPiece = pieceController;
-        
+        HidePieceActions();
         CalculateActions(pieceController.pieceData.movementType, pieceController.GetPosition(), pieceController.pieceData.movementLength);
     }
     
     public void ShowAttackActions(PieceController pieceController){
         //TODO: Show attack actions
+        HidePieceActions();
         Debug.Log("ShowAttackActions, attackType: " + pieceController.pieceData.movementType.ToString());
         currentPiece = pieceController;
         CalculateActions(pieceController.pieceData.movementType, pieceController.GetPosition(), pieceController.pieceData.movementLength, true);
@@ -146,8 +151,10 @@ public class TabletopUI : BaseController
                 CalculateKingMovementActions(currentPosition, movementLength, isAttack);
                 break;
             case MovementType.BISHOP:
+                CalculateBishopMovementActions(currentPosition, movementLength, isAttack);
                 break;
             case MovementType.TOWER:
+                CalculateTowerMovementActions(currentPosition, movementLength, isAttack);
                 break;
             case MovementType.QUEEN:
                 break;
@@ -189,6 +196,96 @@ public class TabletopUI : BaseController
                     }
                     
                     Log("TabletopUI", $"Created action cell at position: {newPosition}");
+                }
+            }
+        }
+    }
+    
+    private void CalculateBishopMovementActions(Vector2Int currentPosition, int movementLength, bool isAttack = false)
+    {
+        // Bishop moves diagonally in all 4 directions
+        // Diagonal directions: (1,1), (1,-1), (-1,1), (-1,-1)
+        Vector2Int[] diagonalDirections = {
+            new Vector2Int(1, 1),   // Top-right
+            new Vector2Int(1, -1),  // Bottom-right
+            new Vector2Int(-1, 1),  // Top-left
+            new Vector2Int(-1, -1)  // Bottom-left
+        };
+        
+        foreach (Vector2Int direction in diagonalDirections)
+        {
+            for (int distance = 1; distance <= movementLength; distance++)
+            {
+                Vector2Int newPosition = new Vector2Int(
+                    currentPosition.x + (direction.x * distance),
+                    currentPosition.y + (direction.y * distance)
+                );
+                
+                // Check if position is within board bounds (5x5)
+                if (IsValidPosition(newPosition, isAttack))
+                {
+                    Vector3 worldPosition = grid.GetCellCenterWorld(new Vector3Int(newPosition.x, 0, newPosition.y));
+                    GameObject actionCell;
+                    if(isAttack) {
+                        actionCell = Instantiate(attackCellPrefab, worldPosition, Quaternion.identity, grid.transform);
+                        attackCells.Add(newPosition, actionCell);
+                    }
+                    else {
+                        actionCell = Instantiate(actionCellPrefab, worldPosition, Quaternion.identity, grid.transform);
+                        actionCells.Add(newPosition, actionCell);
+                    }
+                    
+                    Log("TabletopUI", $"Created bishop action cell at position: {newPosition}");
+                }
+                else
+                {
+                    // If we hit an obstacle or boundary, stop checking this direction
+                    break;
+                }
+            }
+        }
+    }
+    
+    private void CalculateTowerMovementActions(Vector2Int currentPosition, int movementLength, bool isAttack = false)
+    {
+        // Tower moves horizontally and vertically in all 4 directions
+        // Straight directions: (1,0), (-1,0), (0,1), (0,-1)
+        Vector2Int[] straightDirections = {
+            new Vector2Int(1, 0),   // Right
+            new Vector2Int(-1, 0),  // Left
+            new Vector2Int(0, 1),   // Up
+            new Vector2Int(0, -1)   // Down
+        };
+        
+        foreach (Vector2Int direction in straightDirections)
+        {
+            for (int distance = 1; distance <= movementLength; distance++)
+            {
+                Vector2Int newPosition = new Vector2Int(
+                    currentPosition.x + (direction.x * distance),
+                    currentPosition.y + (direction.y * distance)
+                );
+                
+                // Check if position is within board bounds (5x5)
+                if (IsValidPosition(newPosition, isAttack))
+                {
+                    Vector3 worldPosition = grid.GetCellCenterWorld(new Vector3Int(newPosition.x, 0, newPosition.y));
+                    GameObject actionCell;
+                    if(isAttack) {
+                        actionCell = Instantiate(attackCellPrefab, worldPosition, Quaternion.identity, grid.transform);
+                        attackCells.Add(newPosition, actionCell);
+                    }
+                    else {
+                        actionCell = Instantiate(actionCellPrefab, worldPosition, Quaternion.identity, grid.transform);
+                        actionCells.Add(newPosition, actionCell);
+                    }
+                    
+                    Log("TabletopUI", $"Created tower action cell at position: {newPosition}");
+                }
+                else
+                {
+                    // If we hit an obstacle or boundary, stop checking this direction
+                    break;
                 }
             }
         }
@@ -257,6 +354,44 @@ public class TabletopUI : BaseController
         }
         attackCells.Clear();
     }
+
+    public void InitializeTimer(){
+        if (timerComponent != null)
+        {
+            // Load time configuration from game configs
+            var gameConfigs = ResourceController.Instance.GetGameConfigs();
+            if (gameConfigs != null)
+            {
+                timerComponent.SetMaxTime(gameConfigs.timePerPlayerRound);
+                Log("TabletopUI", $"Timer initialized with {gameConfigs.timePerPlayerRound} seconds per round");
+            }
+            else
+            {
+                timerComponent.SetMaxTime(120f); // Default fallback
+                Log("TabletopUI", "Game configs not found, using default 120 seconds");
+            }
+            
+            timerComponent.InitializeTimer();
+            timerGO.SetActive(true);
+        }
+        else
+        {
+            Log("TabletopUI", "Timer component not found!");
+        }
+    }
+    
+    public float GetCurrentTime()
+    {
+        return timerComponent != null ? timerComponent.GetCurrentTime() : 0f;
+    }
+    
+    public float GetTimeRemaining()
+    {
+        return timerComponent != null ? timerComponent.GetTimeRemaining() : 0f;
+    }
+    
+
+
 
 
 

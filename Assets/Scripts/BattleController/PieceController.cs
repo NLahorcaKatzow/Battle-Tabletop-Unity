@@ -16,6 +16,7 @@ public class PieceController : MonoBehaviour
     public bool isMoving = false;
     public bool isAttacking = false;
     public bool isEnemy = false;
+    public bool isDead = false;
 
 
     private void Awake()
@@ -98,8 +99,14 @@ public class PieceController : MonoBehaviour
         Debug.Log($"Destroying piece: {pieceData.name}");
         transform.DOScale(0, 0.5f).SetEase(Ease.InOutSine).OnComplete(() =>
         {
-            TabletopController.Instance.DestroyPiece(generatedId);
+            isDead = true;
         });
+    }
+    
+    public void RevivePiece()
+    {
+        isDead = false;
+        transform.DOScale(1, 0.5f).SetEase(Ease.InOutSine);
     }
 
 
