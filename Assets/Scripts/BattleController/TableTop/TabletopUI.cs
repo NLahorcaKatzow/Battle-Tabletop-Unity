@@ -140,6 +140,7 @@ public class TabletopUI : BaseController
         // Clear previous action cells
         ClearActionCells();
         Debug.Log("CalculateMovementActions, movementType: " + movementType.ToString());
+        if(isAttack) TabletopController.Instance.SetAllPiecesIntangible(currentPiece.generatedId);
         switch(movementType){
             case MovementType.KING:
                 CalculateKingMovementActions(currentPosition, movementLength, isAttack);
@@ -174,7 +175,7 @@ public class TabletopUI : BaseController
                 Vector2Int newPosition = new Vector2Int(currentPosition.x + x, currentPosition.y + z);
                 
                 // Check if position is within board bounds (5x5)
-                if (IsValidPosition(newPosition))
+                if (IsValidPosition(newPosition, isAttack))
                 {
                     Vector3 worldPosition = grid.GetCellCenterWorld(new Vector3Int(newPosition.x, 0, newPosition.y));
                     GameObject actionCell;
@@ -218,6 +219,7 @@ public class TabletopUI : BaseController
         HideAll();
         ClearAttackCells();
         TabletopController.Instance.AttackPiece(newPosition.x, newPosition.y, currentPiece.pieceData.damage);
+        TabletopController.Instance.SetAllPiecesTangible();
         currentPiece = null;
     }
     

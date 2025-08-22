@@ -11,17 +11,7 @@ public class TimedSliderUI : MonoBehaviour
     [SerializeField] private float endValue = 0f;
     [SerializeField] private Ease ease = Ease.Linear;
 
-    private RectTransform rectTransform;
     private Tween activeTween;
-
-    private void Awake()
-    {
-        rectTransform = GetComponent<RectTransform>();
-        if (slider == null)
-        {
-            slider = GetComponentInChildren<Slider>(true);
-        }
-    }
 
     public void Spawn(Vector2 screenPosition)
     {
@@ -31,6 +21,7 @@ public class TimedSliderUI : MonoBehaviour
 
     public void Spawn(Vector2 screenPosition, float duration, float fromValue, float toValue, Ease easeOverride = Ease.Unset)
     {
+        Debug.Log("Spawn TimedSliderUI");
         durationSeconds = duration;
         startValue = fromValue;
         endValue = toValue;
@@ -48,7 +39,7 @@ public class TimedSliderUI : MonoBehaviour
         if (canvas == null)
         {
             Debug.LogWarning("TimedSliderUI requires to be under a Canvas to position in screen space.");
-            rectTransform.position = screenPosition;
+            transform.position = screenPosition;
             return;
         }
 
@@ -58,11 +49,11 @@ public class TimedSliderUI : MonoBehaviour
 
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPosition, camera, out localPoint))
         {
-            rectTransform.anchoredPosition = localPoint;
+            transform.position = localPoint;
         }
         else
         {
-            rectTransform.position = screenPosition;
+            transform.position = screenPosition;
         }
     }
 

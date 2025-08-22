@@ -119,6 +119,18 @@ public class TabletopController : BaseController{
         }
     }
     
+    public void SetAllPiecesIntangible(int currentPieceId){
+        foreach(var piece in currentPiecesInTabletop){
+            if(piece.Value.pieceController.generatedId == currentPieceId) continue;
+            piece.Value.go.layer = LayerMask.NameToLayer("Ignore Raycast");
+        }
+    }
+    public void SetAllPiecesTangible(){
+        foreach(var piece in currentPiecesInTabletop){
+            piece.Value.go.layer = LayerMask.NameToLayer("Piece");
+        }
+    }
+    
     
     public void RecalculatePositions(){
         //TODO:

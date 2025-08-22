@@ -82,7 +82,8 @@ public class PieceController : MonoBehaviour
 
     public void ApplyDamage(int damage)
     {
-        damageSlider.Spawn(Camera.main.WorldToScreenPoint(transform.position), 0.5f, (pieceData.health)/pieceData.maxHealth, (pieceData.health - damage)/pieceData.maxHealth, Ease.OutSine);
+        var sliderDamage = Instantiate(damageSlider, UIController.GetTransform()).GetComponent<TimedSliderUI>();
+        sliderDamage.Spawn(Camera.main.WorldToScreenPoint(transform.position), 0.5f, (pieceData.health)/pieceData.maxHealth, (pieceData.health - damage)/pieceData.maxHealth, Ease.OutSine);
         damageNumberPrefab.Spawn(Camera.main.WorldToScreenPoint(transform.position), damage);
         pieceData.health -= damage;
         if (pieceData.health <= 0)

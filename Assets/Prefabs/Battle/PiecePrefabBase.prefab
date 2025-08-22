@@ -245,6 +245,8 @@ MonoBehaviour:
   generatedId: 0
   position: {x: 0, y: 0}
   selectedHalo: {fileID: 2725963591324830797}
+  damageSlider: {fileID: 2092505393095433329, guid: 6b8d137aee849514ea625b7f66725109, type: 3}
+  damageNumberPrefab: {fileID: 6051630780705075272, guid: 733f1f4a7ec4b7c43a7d68ed67271064, type: 3}
   isSelected: 0
   isMoving: 0
   isAttacking: 0
