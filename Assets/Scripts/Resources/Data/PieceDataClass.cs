@@ -4,7 +4,6 @@ public class PieceDataClass
     public int id;
     public string name;
     public int damage;
-    public int health;
     public int maxHealth;
     public MovementType movementType;
     public int movementLength;

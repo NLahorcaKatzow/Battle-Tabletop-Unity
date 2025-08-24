@@ -3,6 +3,7 @@ using Unity.Android.Gradle.Manifest;
 using UnityEngine;
 using DamageNumbersPro;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class PieceController : MonoBehaviour
 {
@@ -10,9 +11,10 @@ public class PieceController : MonoBehaviour
     public PieceDataClass pieceData;
     public Vector2Int position;
     public GameObject selectedHalo;
-    public TimedSliderUI damageSlider;
+    public Slider damageSlider;
     public DamageNumber damageNumberPrefab;
     public GameObject render;
+    public int currentHealth;
 
     public bool isSelected = false;
     public bool isMoving = false;
@@ -36,6 +38,7 @@ public class PieceController : MonoBehaviour
         generatedId = gameObject.GetInstanceID();
         pieceData = data;
         this.isEnemy = isEnemy;
+        currentHealth = pieceData.maxHealth;
     }
 
     public void SetPosition(Vector2Int pos)
@@ -90,14 +93,22 @@ public class PieceController : MonoBehaviour
 
     public void ApplyDamage(int damage)
     {
-        var sliderDamage = Instantiate(damageSlider, UIController.GetTransform()).GetComponent<TimedSliderUI>();
-        sliderDamage.Spawn(Camera.main.WorldToScreenPoint(transform.position), 0.5f, (pieceData.health) / pieceData.maxHealth, (pieceData.health - damage) / pieceData.maxHealth, Ease.OutSine);
+        if(damage == 0) {
+        Debug.Log("PieceController: Damage is 0, skipping");
+        return;
+        }
+        Debug.Log("PieceController: Health: " + currentHealth + " Max Health: " + pieceData.maxHealth);
+        Debug.Log("PieceController: Applying damage: " + damage + " relative damage: " + (float)(currentHealth - damage) / (float)pieceData.maxHealth);
+        damageSlider.transform.parent.gameObject.SetActive(true);
         damageNumberPrefab.Spawn(Camera.main.WorldToScreenPoint(transform.position), damage);
-        pieceData.health -= damage;
+        currentHealth -= damage;
+        damageSlider.value = (float)currentHealth / (float)pieceData.maxHealth;
+        
         render.GetComponent<Renderer>().material.DOColor(Color.red, 0.3f).SetLoops(2, LoopType.Yoyo);
         render.transform.DOShakePosition(0.3f, 0.3f, 10, 90, false, false);
-        if (pieceData.health <= 0)
-        {
+        if (currentHealth <= 0)
+        {   
+            damageSlider.value = 0;
             DestroyPiece();
         }
 

@@ -134,7 +134,7 @@ public class TabletopController : MonoBehaviour
 
     public bool IsPositionEmpty(Vector2Int position)
     {
-        return currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.GetPosition() == position).Value == null;
+        return currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.GetPosition() == position && !piece.Value.pieceController.isDead).Value == null;
     }
 
     public Grid GetGrid()
