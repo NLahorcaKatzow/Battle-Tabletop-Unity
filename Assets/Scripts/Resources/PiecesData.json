@@ -57,7 +57,7 @@
   {
     "id": 6,
     "name": "piece:king",
-    "damage": 0,
+    "damage": 5,
     "health": 5,
     "maxHealth": 5,
     "movementType": 5,

@@ -1,0 +1,69 @@
+# Archivos generados por Unity
+[Ll]ibrary/
+[Tt]emp/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+
+# Compilación de Addressables
+/[Aa]sset[Bb]undles/
+[Aa]ssetBundles/
+
+# Archivos de cache del sistema operativo
+[Dd]ebug/
+*.pidb
+*.suo
+*.user
+*.userprefs
+*.unityproj
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Compilación local de VS/Mono
+.vs/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+
+# Paquetes descargados
+/[Oo]bj/
+[Ee]xportedObj/
+[Pp]ackages/com.unity.package-manager/
+[Pp]ackages/packages-lock.json
+
+# Archivos de cache de Unity
+/[Uu]serSettings/
+*.apk
+*.aab
+*.unitypackage
+
+# Crash Reports
+sysinfo.txt
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# JetBrains Rider
+.idea/
+*.iml
+
+# VS Code
+.vscode/
