@@ -843,7 +843,7 @@ MonoBehaviour:
   drawBoardGrid: 1
   boardOrigin: {x: 0, y: 0, z: 0}
   cellSize: 1
-  planeXZ: 1
+  planeXZ: 0
   pointRadius: 0.16
   arrowHeadSize: 0.25
   startColor: {r: 1, g: 1, b: 1, a: 0.85}

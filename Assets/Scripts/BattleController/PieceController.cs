@@ -12,6 +12,7 @@ public class PieceController : MonoBehaviour
     public GameObject selectedHalo;
     public TimedSliderUI damageSlider;
     public DamageNumber damageNumberPrefab;
+    public GameObject render;
 
     public bool isSelected = false;
     public bool isMoving = false;
@@ -93,8 +94,8 @@ public class PieceController : MonoBehaviour
         sliderDamage.Spawn(Camera.main.WorldToScreenPoint(transform.position), 0.5f, (pieceData.health) / pieceData.maxHealth, (pieceData.health - damage) / pieceData.maxHealth, Ease.OutSine);
         damageNumberPrefab.Spawn(Camera.main.WorldToScreenPoint(transform.position), damage);
         pieceData.health -= damage;
-        GetComponent<Material>().DOColor(Color.red, 0.3f).SetLoops(1, LoopType.Yoyo);
-        transform.DOShakePosition(0.3f, 0.3f, 10, 90, false, false);
+        render.GetComponent<Renderer>().material.DOColor(Color.red, 0.3f).SetLoops(2, LoopType.Yoyo);
+        render.transform.DOShakePosition(0.3f, 0.3f, 10, 90, false, false);
         if (pieceData.health <= 0)
         {
             DestroyPiece();
