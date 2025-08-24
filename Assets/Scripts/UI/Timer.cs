@@ -13,9 +13,6 @@ public class Timer : MonoBehaviour
     [SerializeField] private Image timerFillImage;
     [SerializeField] private Image teamTurnImage;
     
-    public event Action OnTimeUp;
-    public event Action<float> OnTimeChanged;
-    
     private float currentTime;
     public bool isRunning = false;
     public bool isPaused = false;
@@ -41,6 +38,7 @@ public class Timer : MonoBehaviour
         {
             timerFillImage.fillAmount = 1f;
         }
+        BattleController.Instance.OnTurnChange += ResetTimer;
     }
     [Button]
     public void StartTimer()
@@ -143,14 +141,13 @@ public class Timer : MonoBehaviour
         if (currentTime > 0)
         {
             currentTime -= Time.deltaTime;
-            OnTimeChanged?.Invoke(currentTime);
             UpdateTimerDisplay();
             
             if (currentTime <= 0)
             {
                 currentTime = 0;
                 isRunning = false;
-                OnTimeUp?.Invoke();
+                BattleController.Instance.OnTimeUp();
                 Log("Timer", "Time is up!");
             }
         }

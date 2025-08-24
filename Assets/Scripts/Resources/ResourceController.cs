@@ -97,7 +97,7 @@ public class ResourceController : MonoBehaviour
 
     private void LoadPiecesData()
     {
-        string json = Resources.Load<TextAsset>("PiecesData").text;
+        string json = Resources.Load<TextAsset>("Data/PiecesData").text;
         piecesData = JsonConvert.DeserializeObject<List<PieceDataClass>>(json);
         Debug.Log("PiecesData loaded");
         Debug.Log(JsonConvert.SerializeObject(piecesData));
@@ -106,7 +106,7 @@ public class ResourceController : MonoBehaviour
     
     private void LoadSavedPositions()
     {
-        string json = Resources.Load<TextAsset>("PlayerSavedPositions").text;
+        string json = Resources.Load<TextAsset>("Data/PlayerSavedPositions").text;
         savedPositions = JsonConvert.DeserializeObject<List<SavedPosition>>(json);
         Debug.Log("SavedPositions loaded");
         Debug.Log(JsonConvert.SerializeObject(savedPositions));
@@ -128,8 +128,8 @@ public class ResourceController : MonoBehaviour
 
     private void LoadGameConfigs()
     {
-        string json = Resources.Load<TextAsset>("GameConfigs").text;
-        gameConfigs = JsonConvert.DeserializeObject<GameConfigs>(json);
+        var textAsset = Resources.Load<TextAsset>("Data/GameConfigs");
+        gameConfigs = JsonConvert.DeserializeObject<GameConfigs>(textAsset.text);
         Debug.Log("GameConfigs loaded");
         Debug.Log(JsonConvert.SerializeObject(gameConfigs));
     }

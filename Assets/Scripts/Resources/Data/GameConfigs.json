@@ -1,0 +1,10 @@
+{
+  "maxRounds": 100,
+  "timePerPlayerRound": 20,
+  "gameSettings": {
+    "boardSizeX": 5,
+    "boardSizeY": 5,
+    "turnTimeLimit": 20,
+    "maxMovesPerGame": 100
+  }
+}

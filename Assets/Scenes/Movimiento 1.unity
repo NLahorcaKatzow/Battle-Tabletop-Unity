@@ -510,7 +510,8 @@ MonoBehaviour:
     maxRounds: 0
     timePerPlayerRound: 0
     gameSettings:
-      boardSize: 0
+      boardSizeX: 0
+      boardSizeY: 0
       turnTimeLimit: 0
       maxMovesPerGame: 0
   enemyPositionsPresetResourcePath: Data/EnemyPositionsPreset1
@@ -789,6 +790,7 @@ GameObject:
   m_Component:
   - component: {fileID: 958045246}
   - component: {fileID: 958045247}
+  - component: {fileID: 958045248}
   m_Layer: 0
   m_Name: BattleController
   m_TagString: Untagged
@@ -823,6 +825,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b593b48fb5d2fa54b8f94b4e33b14f6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentTurn: 0
+--- !u!114 &958045248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 958045245}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2e2517efbc64fa4aad5a46ae6284912, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gizmosEnabled: 1
+  gizmosOnlyWhenSelected: 0
+  drawBoardGrid: 1
+  boardOrigin: {x: 0, y: 0, z: 0}
+  cellSize: 1
+  planeXZ: 1
+  pointRadius: 0.16
+  arrowHeadSize: 0.25
+  startColor: {r: 1, g: 1, b: 1, a: 0.85}
+  moveColor: {r: 0, g: 0.75, b: 1, a: 0.95}
+  attackColor: {r: 1, g: 0.25, b: 0.25, a: 0.95}
+  gridColor: {r: 1, g: 1, b: 1, a: 0.15}
+  failColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.7}
 --- !u!1 &987018994
 GameObject:
   m_ObjectHideFlags: 0
@@ -2190,10 +2218,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d36b6195e97ebaf429ffb154ada63875, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxTime: 120
+  maxTime: 10
   timerText: {fileID: 1224733417}
   timerFillImage: {fileID: 1286837757}
   teamTurnImage: {fileID: 1046732312}
+  isRunning: 0
+  isPaused: 0
 --- !u!222 &1927785644
 CanvasRenderer:
   m_ObjectHideFlags: 0

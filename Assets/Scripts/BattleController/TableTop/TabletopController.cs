@@ -41,7 +41,41 @@ public class TabletopController : MonoBehaviour
         Dictionary<int, SavedPosition> enemyPositions = ResourceController.Instance.GetEnemyPositions();
         tabletopUI.InitializateUI(savedPositions, enemyPositions);
     }
-    
+
+    public void SetTurn(int turn)
+    {
+        Debug.Log("TabletopController: SetTurn, turn: " + turn);
+        if (turn % 2 == 1)
+        {
+            //TODO: es turno del enemigo
+            SetAllPlayerPiecesInactives();
+            //TODO: iniciar IA
+            var enemyPieces = currentPiecesInTabletop.Values.Where(piece => piece.pieceController.isEnemy).ToList();
+            var playerPieces = currentPiecesInTabletop.Values.Where(piece => !piece.pieceController.isEnemy).ToList();
+            IAController.Instance.StartCoroutine(IAController.Instance.Initialize(enemyPieces, playerPieces));
+            return;
+        }
+        SetAllPlayerPiecesActives();
+    }
+
+    public void SetAllPlayerPiecesInactives()
+    {
+        foreach (var piece in currentPiecesInTabletop)
+        {
+            if (piece.Value.pieceController.isEnemy) continue;
+            piece.Value.pieceController.SetPieceInactive();
+        }
+    }
+
+
+    public void SetAllPlayerPiecesActives()
+    {
+        foreach (var piece in currentPiecesInTabletop)
+        {
+            if (piece.Value.pieceController.isEnemy) continue;
+            piece.Value.pieceController.SetPieceActive();
+        }
+    }
 
     private void Update()
     {
@@ -103,6 +137,10 @@ public class TabletopController : MonoBehaviour
         return currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.GetPosition() == position).Value == null;
     }
 
+    public Grid GetGrid()
+    {
+        return tabletopUI.grid;
+    }
 
 
     public void AttackPiece(int x, int y, int damage)
@@ -125,7 +163,7 @@ public class TabletopController : MonoBehaviour
     {
         Debug.Log("TabletopController: Destroying piece: " + id);
         var piece = currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.generatedId == id).Value;
-        if (piece == null) 
+        if (piece == null)
         {
             Debug.Log("TabletopController: Piece " + id + " not found");
             return;

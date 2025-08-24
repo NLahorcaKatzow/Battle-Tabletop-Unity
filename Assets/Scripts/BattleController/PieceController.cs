@@ -2,6 +2,7 @@ using DG.Tweening;
 using Unity.Android.Gradle.Manifest;
 using UnityEngine;
 using DamageNumbersPro;
+using UnityEngine.Events;
 
 public class PieceController : MonoBehaviour
 {
@@ -46,11 +47,16 @@ public class PieceController : MonoBehaviour
         return position;
     }
 
-    public void MoveToPosition(Vector3 newPosition)
+    public void MoveToPosition(Vector2Int newPosition, UnityAction onComplete = null, float easeTime = 0.5f)
     {
-        transform.DOMove(newPosition, 0.5f).SetEase(Ease.InOutSine).OnComplete(() =>
+        transform.DOMove(TabletopController.Instance.GetGrid()
+        .GetCellCenterWorld(new Vector3Int(newPosition.x, 0, newPosition.y)), easeTime)
+        .SetEase(Ease.InOutSine).OnComplete(() =>
         {
+            SetPosition(newPosition);
+            SetMovementBool(true);
             Deselect();
+            onComplete?.Invoke();
         });
     }
 
@@ -84,9 +90,11 @@ public class PieceController : MonoBehaviour
     public void ApplyDamage(int damage)
     {
         var sliderDamage = Instantiate(damageSlider, UIController.GetTransform()).GetComponent<TimedSliderUI>();
-        sliderDamage.Spawn(Camera.main.WorldToScreenPoint(transform.position), 0.5f, (pieceData.health)/pieceData.maxHealth, (pieceData.health - damage)/pieceData.maxHealth, Ease.OutSine);
+        sliderDamage.Spawn(Camera.main.WorldToScreenPoint(transform.position), 0.5f, (pieceData.health) / pieceData.maxHealth, (pieceData.health - damage) / pieceData.maxHealth, Ease.OutSine);
         damageNumberPrefab.Spawn(Camera.main.WorldToScreenPoint(transform.position), damage);
         pieceData.health -= damage;
+        GetComponent<Material>().DOColor(Color.red, 0.3f).SetLoops(1, LoopType.Yoyo);
+        transform.DOShakePosition(0.3f, 0.3f, 10, 90, false, false);
         if (pieceData.health <= 0)
         {
             DestroyPiece();
@@ -96,19 +104,31 @@ public class PieceController : MonoBehaviour
 
     public void DestroyPiece()
     {
+        
         Debug.Log($"Destroying piece: {pieceData.name}");
         transform.DOScale(0, 0.5f).SetEase(Ease.InOutSine).OnComplete(() =>
         {
             isDead = true;
         });
     }
-    
+
     public void RevivePiece()
     {
         isDead = false;
         transform.DOScale(1, 0.5f).SetEase(Ease.InOutSine);
     }
 
+    public void SetPieceInactive()
+    {
+        isMoving = true;
+        isAttacking = true;
+    }
+
+    public void SetPieceActive()
+    {
+        isMoving = false;
+        isAttacking = false;
+    }
 
     public void SetMovementBool(bool value)
     {

@@ -11,7 +11,8 @@ public class GameConfigs
 [Serializable]
 public class GameSettings
 {
-    public int boardSize;
+    public int boardSizeX;
+    public int boardSizeY;
     public int turnTimeLimit;
     public int maxMovesPerGame;
 }

@@ -1,9 +1,0 @@
-{
-  "maxRounds": 100,
-  "timePerPlayerRound": 120,
-  "gameSettings": {
-    "boardSize": 5,
-    "turnTimeLimit": 120,
-    "maxMovesPerGame": 100
-  }
-}

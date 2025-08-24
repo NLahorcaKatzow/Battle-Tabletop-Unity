@@ -10,7 +10,7 @@ public class TabletopUI : BaseController
 
     [SerializeField] private GameObject tabletopUI;
     [SerializeField] private GameObject tabletopGO;
-    [SerializeField] private Grid grid;
+    public Grid grid;
     [SerializeField] private GameObject piecePrefab;
     [SerializeField] private GameObject actionCellPrefab;
     [SerializeField] private GameObject pieceInfoPanel;
@@ -295,9 +295,8 @@ public class TabletopUI : BaseController
         //TODO: Select action cell
         if(currentPiece == null) return;
         var newPosition = actionCells.FirstOrDefault(cell => cell.Value.GetInstanceID() == id).Key;
-        currentPiece.SetPosition(newPosition);
-        currentPiece.SetMovementBool(true);
-        currentPiece.MoveToPosition(grid.GetCellCenterWorld(new Vector3Int(newPosition.x, 0, newPosition.y)));
+
+        currentPiece.MoveToPosition(newPosition);
         currentPiece.Deselect();
         HideAll();
         ClearActionCells();
