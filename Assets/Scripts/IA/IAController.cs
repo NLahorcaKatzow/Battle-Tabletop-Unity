@@ -47,6 +47,7 @@ public class IAController : MonoBehaviour
         if (planeXZ) worldPos += Vector3.up * renderYOffset;
         var go = Instantiate(prefab, worldPos, Quaternion.identity, rendersParent);
         bucket.Add(go);
+        go.SetActive(false);
     }
 
     void RenderHintsForPiece(
@@ -99,55 +100,63 @@ public class IAController : MonoBehaviour
 
         for (int i = 0; i < enemyPieces.Count; i++)
         {
-            var randomPlayerPiece = playerPieces.OrderBy(x => Random.value).First();
+            var randomPlayerPiece = playerPieces.OrderBy(x => Random.value).ToList();
             var enemyPiece = enemyPieces[i];
 
             // Mostrar al jugador todas las opciones del enemigo ACTUAL (mover/atacar)
             // Asumimos IA = lado negro. Si tu juego usa otro, ajustá aquí.
+            Side side = (enemyPiece.pieceController.position.x % 2 == 0 && enemyPiece.pieceController.position.y % 2 == 0) ? Side.Black : Side.White;
+
             RenderHintsForPiece(
                 enemyPiece.pieceController.pieceData.movementType,
                 enemyPiece.pieceController.position,
                 boardSizeX, boardSizeY,
-                Side.Black,
+                side,
                 PlayerPositions()
             );
 
             // Pequeña pausa para que el jugador lo vea antes de que actúe la IA
             yield return new WaitForSeconds(0.35f);
 
-            Vector2Int moveTo, attackTo;
-            var canMove = TryPlanMoveAndAttack(
-                enemyPiece.pieceController.pieceData.movementType,
-                enemyPiece.pieceController.position,
-                randomPlayerPiece.pieceController.position,
-                boardSizeX,
-                boardSizeY,
-                out moveTo,
-                out attackTo
-            );
-
-            // --- GIZMOS: registrar plan para visualizar ---
-            PushDebugPlan(
-                enemyPiece.pieceController,
-                enemyPiece.pieceController.position,
-                randomPlayerPiece.pieceController.position,
-                moveTo, attackTo, canMove
-            );
-
-            if (canMove)
+            foreach (var playerPiece in randomPlayerPiece)
             {
-                Debug.Log("#IAController#: Moving to: " + moveTo.x + ", " + moveTo.y);
-                enemyPiece.pieceController.MoveToPosition(moveTo);
+                Vector2Int moveTo, attackTo;
+                var canMove = TryPlanMoveAndAttack(
+                    enemyPiece.pieceController.pieceData.movementType,
+                    enemyPiece.pieceController.position,
+                    playerPiece.pieceController.position,
+                    boardSizeX,
+                    boardSizeY,
+                    out moveTo,
+                    out attackTo
+                );
+                if (!canMove) continue;
+                moveRenderInstances.ForEach(instance => instance.SetActive(true));
+                // --- GIZMOS: registrar plan para visualizar ---
+                PushDebugPlan(
+                    enemyPiece.pieceController,
+                    enemyPiece.pieceController.position,
+                    playerPiece.pieceController.position,
+                    moveTo, attackTo, canMove
+                );
+
+                if (canMove)
+                {
+                    Debug.Log("#IAController#: Moving to: " + moveTo.x + ", " + moveTo.y);
+                    enemyPiece.pieceController.MoveToPosition(moveTo);
+                    yield return new WaitForSeconds(1f);
+                    attackRenderInstances.ForEach(instance => instance.SetActive(true));
+                    yield return new WaitForSeconds(1f);
+                    Debug.Log("#IAController#: Attacking to: " + attackTo.x + ", " + attackTo.y);
+                    TabletopController.Instance.AttackPiece(attackTo.x, attackTo.y, enemyPiece.pieceController.pieceData.damage);
+                }
+
+                // Al terminar el turno de esta pieza, limpiar los renders
+                ClearAllRenderHints();
+
                 yield return new WaitForSeconds(1f);
-
-                Debug.Log("#IAController#: Attacking to: " + attackTo.x + ", " + attackTo.y);
-                TabletopController.Instance.AttackPiece(attackTo.x, attackTo.y, enemyPiece.pieceController.pieceData.damage);
+                break;
             }
-
-            // Al terminar el turno de esta pieza, limpiar los renders
-            ClearAllRenderHints();
-
-            yield return new WaitForSeconds(1f);
         }
     }
 
@@ -431,12 +440,12 @@ public class IAController : MonoBehaviour
         bool can = false;
         switch (type)
         {
-            case MovementType.TOWER:  can = TryRookCandidate (start, target, boardWidth, boardHeight, out moveTo); break;
+            case MovementType.TOWER: can = TryRookCandidate(start, target, boardWidth, boardHeight, out moveTo); break;
             case MovementType.BISHOP: can = TryBishopCandidate(start, target, boardWidth, boardHeight, out moveTo); break;
-            case MovementType.QUEEN:  can = TryQueenCandidate (start, target, boardWidth, boardHeight, out moveTo); break;
-            case MovementType.HORSE:  can = TryKnightCandidate(start, target, boardWidth, boardHeight, out moveTo); break;
-            case MovementType.KING:   can = TryKingCandidate  (start, target, boardWidth, boardHeight, out moveTo); break;
-            case MovementType.PAWN:   can = TryPawnCandidate  (start, target, boardWidth, boardHeight, side, pawnStartRank, out moveTo); break;
+            case MovementType.QUEEN: can = TryQueenCandidate(start, target, boardWidth, boardHeight, out moveTo); break;
+            case MovementType.HORSE: can = TryKnightCandidate(start, target, boardWidth, boardHeight, out moveTo); break;
+            case MovementType.KING: can = TryKingCandidate(start, target, boardWidth, boardHeight, out moveTo); break;
+            case MovementType.PAWN: can = TryPawnCandidate(start, target, boardWidth, boardHeight, side, pawnStartRank, out moveTo); break;
         }
 
         // --- Fallback "alejarse y atacar al bloqueador" para piezas deslizantes ---
@@ -588,19 +597,19 @@ public class IAController : MonoBehaviour
                 yield break;
 
             case MovementType.PAWN:
-            {
-                int fwd = (side == Side.White) ? +1 : -1;
-                var one = new Vector2Int(start.x, start.y + fwd);
-                if (Valid(one, w, h)) yield return one;
-
-                if (pawnStartRank == start.y)
                 {
-                    var two = new Vector2Int(start.x, start.y + 2 * fwd);
-                    // Para doble paso, ambas casillas deben estar libres:
-                    if (Valid(one, w, h) && Valid(two, w, h)) yield return two;
+                    int fwd = (side == Side.White) ? +1 : -1;
+                    var one = new Vector2Int(start.x, start.y + fwd);
+                    if (Valid(one, w, h)) yield return one;
+
+                    if (pawnStartRank == start.y)
+                    {
+                        var two = new Vector2Int(start.x, start.y + 2 * fwd);
+                        // Para doble paso, ambas casillas deben estar libres:
+                        if (Valid(one, w, h) && Valid(two, w, h)) yield return two;
+                    }
+                    yield break;
                 }
-                yield break;
-            }
         }
     }
 
@@ -629,40 +638,40 @@ public class IAController : MonoBehaviour
             switch (type)
             {
                 case MovementType.TOWER:
-                {
-                    if (from.x == target.x || from.y == target.y)
-                        if (IsLineClearExclusive(from, target)) yield return target;
-                    break;
-                }
+                    {
+                        if (from.x == target.x || from.y == target.y)
+                            if (IsLineClearExclusive(from, target)) yield return target;
+                        break;
+                    }
                 case MovementType.BISHOP:
-                {
-                    if (Abs(from.x - target.x) == Abs(from.y - target.y))
-                        if (IsLineClearExclusive(from, target)) yield return target;
-                    break;
-                }
+                    {
+                        if (Abs(from.x - target.x) == Abs(from.y - target.y))
+                            if (IsLineClearExclusive(from, target)) yield return target;
+                        break;
+                    }
                 case MovementType.QUEEN:
-                {
-                    bool aligned = (from.x == target.x || from.y == target.y) || (Abs(from.x - target.x) == Abs(from.y - target.y));
-                    if (aligned && IsLineClearExclusive(from, target)) yield return target;
-                    break;
-                }
+                    {
+                        bool aligned = (from.x == target.x || from.y == target.y) || (Abs(from.x - target.x) == Abs(from.y - target.y));
+                        if (aligned && IsLineClearExclusive(from, target)) yield return target;
+                        break;
+                    }
                 case MovementType.HORSE:
-                {
-                    if (IsKnightNeighbor(from, target)) yield return target;
-                    break;
-                }
+                    {
+                        if (IsKnightNeighbor(from, target)) yield return target;
+                        break;
+                    }
                 case MovementType.KING:
-                {
-                    if (Chebyshev(from, target) == 1) yield return target;
-                    break;
-                }
+                    {
+                        if (Chebyshev(from, target) == 1) yield return target;
+                        break;
+                    }
                 case MovementType.PAWN:
-                {
-                    int fwd = (side == Side.White) ? +1 : -1;
-                    if (Abs(target.x - from.x) == 1 && (target.y - from.y) == fwd)
-                        yield return target;
-                    break;
-                }
+                    {
+                        int fwd = (side == Side.White) ? +1 : -1;
+                        if (Abs(target.x - from.x) == 1 && (target.y - from.y) == fwd)
+                            yield return target;
+                        break;
+                    }
             }
         }
     }
@@ -756,12 +765,12 @@ public class IAController : MonoBehaviour
 
     void DrawPlan(DebugPlan p)
     {
-        var startPos  = GridToWorld(p.start);
-        var movePos   = GridToWorld(p.moveTo);
+        var startPos = GridToWorld(p.start);
+        var movePos = GridToWorld(p.moveTo);
         var attackPos = GridToWorld(p.attackTo);
 
-        var cStart  = p.ok ? startColor  : failColor;
-        var cMove   = p.ok ? moveColor   : failColor;
+        var cStart = p.ok ? startColor : failColor;
+        var cMove = p.ok ? moveColor : failColor;
         var cAttack = p.ok ? attackColor : failColor;
 
         Gizmos.color = cStart;
@@ -791,16 +800,8 @@ public class IAController : MonoBehaviour
     // ----- primitivas -----
     Vector3 GridToWorld(Vector2Int c)
     {
-        if (planeXZ)
-        {
-            var localXZ = new Vector3(c.x * cellSize + cellSize * 0.5f, 0f, c.y * cellSize + cellSize * 0.5f);
-            return boardOrigin + localXZ;
-        }
-        else
-        {
-            var localXY = new Vector3(c.x * cellSize + cellSize * 0.5f, c.y * cellSize + cellSize * 0.5f, 0f);
-            return boardOrigin + localXY;
-        }
+        Vector3 newPos = TabletopController.Instance.GetGrid().GetCellCenterWorld(new Vector3Int(c.x, 0, c.y));
+        return newPos;
     }
 
     Vector3 EdgeOffset() => Vector3.zero;
@@ -817,16 +818,16 @@ public class IAController : MonoBehaviour
         if (planeXZ)
         {
             a = center + new Vector3(-half, 0, -half);
-            b = center + new Vector3( half, 0, -half);
-            c = center + new Vector3( half, 0,  half);
-            d = center + new Vector3(-half, 0,  half);
+            b = center + new Vector3(half, 0, -half);
+            c = center + new Vector3(half, 0, half);
+            d = center + new Vector3(-half, 0, half);
         }
         else
         {
             a = center + new Vector3(-half, -half, 0);
-            b = center + new Vector3( half, -half, 0);
-            c = center + new Vector3( half,  half, 0);
-            d = center + new Vector3(-half,  half, 0);
+            b = center + new Vector3(half, -half, 0);
+            c = center + new Vector3(half, half, 0);
+            d = center + new Vector3(-half, half, 0);
         }
         Gizmos.DrawLine(a, b); Gizmos.DrawLine(b, c); Gizmos.DrawLine(c, d); Gizmos.DrawLine(d, a);
     }

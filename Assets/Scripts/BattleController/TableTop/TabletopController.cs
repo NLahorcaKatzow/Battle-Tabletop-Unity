@@ -45,6 +45,7 @@ public class TabletopController : MonoBehaviour
     public void SetTurn(int turn)
     {
         Debug.Log("TabletopController: SetTurn, turn: " + turn);
+        tabletopUI.HideAll();
         if (turn % 2 == 1)
         {
             //TODO: es turno del enemigo

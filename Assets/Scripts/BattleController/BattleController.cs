@@ -28,7 +28,7 @@ public class BattleController : BaseController
     }
 
     [Button]
-    public void InitializeCombat(int newTurn = 0)
+    public void InitializeCombat(int newTurn = 1)
     {
         //TODO: Initialize combat
         currentTurn = newTurn;
