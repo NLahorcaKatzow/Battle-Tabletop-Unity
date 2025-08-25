@@ -39,6 +39,8 @@ public class PieceController : MonoBehaviour
         pieceData = data;
         this.isEnemy = isEnemy;
         currentHealth = pieceData.maxHealth;
+
+        render = RenderController.Instance.InstantiatePieceByMovementType(data.movementType, transform.position, transform);
     }
 
     public void SetPosition(Vector2Int pos)
@@ -93,9 +95,10 @@ public class PieceController : MonoBehaviour
 
     public void ApplyDamage(int damage)
     {
-        if(damage == 0) {
-        Debug.Log("PieceController: Damage is 0, skipping");
-        return;
+        if (damage == 0)
+        {
+            Debug.Log("PieceController: Damage is 0, skipping");
+            return;
         }
         Debug.Log("PieceController: Health: " + currentHealth + " Max Health: " + pieceData.maxHealth);
         Debug.Log("PieceController: Applying damage: " + damage + " relative damage: " + (float)(currentHealth - damage) / (float)pieceData.maxHealth);
@@ -103,11 +106,14 @@ public class PieceController : MonoBehaviour
         damageNumberPrefab.Spawn(Camera.main.WorldToScreenPoint(transform.position), damage);
         currentHealth -= damage;
         damageSlider.value = (float)currentHealth / (float)pieceData.maxHealth;
-        
-        render.GetComponent<Renderer>().material.DOColor(Color.red, 0.3f).SetLoops(2, LoopType.Yoyo);
+
+        var rend = render.GetComponentInChildren<Renderer>();
+        TweenUtils.Flash(rend, "_Mid_Color", Color.red, 0.3f);
+
+
         render.transform.DOShakePosition(0.3f, 0.3f, 10, 90, false, false);
         if (currentHealth <= 0)
-        {   
+        {
             damageSlider.value = 0;
             DestroyPiece();
         }
@@ -116,7 +122,7 @@ public class PieceController : MonoBehaviour
 
     public void DestroyPiece()
     {
-        
+
         Debug.Log($"Destroying piece: {pieceData.name}");
         transform.DOScale(0, 0.5f).SetEase(Ease.InOutSine).OnComplete(() =>
         {

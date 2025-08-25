@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: f760dc3f5b06c7f4fbc002ae8e754bd2
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 625f186215c104763be7675aa2d941aa, type: 3}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 328642
+  packageName: Handpainted Shader and Oil & Pointillism Textures
+  packageVersion: 1.0
+  assetPath: Assets/Adrift Team/HandPainted Oil & Pointillism/Shaders/HandPainted_Oil&Pointillism_WA_Mix_AT.shadergraph
+  uploadId: 777976
