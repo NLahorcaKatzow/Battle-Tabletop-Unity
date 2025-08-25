@@ -506,6 +506,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   logs: 1
+  piecesData: []
   gameConfigs:
     maxRounds: 0
     timePerPlayerRound: 0
@@ -838,12 +839,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2e2517efbc64fa4aad5a46ae6284912, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  moveRender: {fileID: 331877976951285589, guid: 9d8fb2c6ee7b0d24187605f2fca17c2c, type: 3}
+  attackRender: {fileID: 8484599132584894412, guid: c01fa08daf545f544b7dfd1fcd2c3043, type: 3}
+  rendersParent: {fileID: 1544464580}
+  renderYOffset: 0.02
   gizmosEnabled: 1
   gizmosOnlyWhenSelected: 0
   drawBoardGrid: 1
   boardOrigin: {x: 0, y: 0, z: 0}
   cellSize: 1
-  planeXZ: 0
+  planeXZ: 1
   pointRadius: 0.16
   arrowHeadSize: 0.25
   startColor: {r: 1, g: 1, b: 1, a: 0.85}

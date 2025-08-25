@@ -110,13 +110,14 @@ public class TabletopUI : BaseController
     
     public void HidePieceActions(){
         pieceActionsPanel.SetActive(false);
+        ClearActionCells();
+        ClearAttackCells();
     }
     
     public void HideAll(){
         HidePieceInfo();
         HidePieceActions();
-        ClearActionCells();
-        ClearAttackCells();
+        
     }
     
     public void HideTabletop(){
