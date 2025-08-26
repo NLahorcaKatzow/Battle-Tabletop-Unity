@@ -83,11 +83,7 @@ public class PieceController : MonoBehaviour
 
     public void Deselect()
     {
-        if (isSelected)
-        {
-            Debug.Log($"Unselected piece: {pieceData.name}");
-            //TODO: Deseleccionar la pieza si estaba seleccionada
-        }
+        Debug.Log("PieceController: Deselecting piece: " + pieceData.name);
         isSelected = false;
         selectedHalo.SetActive(false);
     }

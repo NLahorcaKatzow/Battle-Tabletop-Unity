@@ -100,11 +100,9 @@ public class IAController : MonoBehaviour
 
         for (int i = 0; i < enemyPieces.Count; i++)
         {
-            var randomPlayerPiece = playerPieces.OrderBy(x => Random.value).ToList();
+            var randomPlayerPiece = playerPieces.Where(x => !x.pieceController.isDead).OrderBy(x => Random.value).ToList();
             var enemyPiece = enemyPieces[i];
 
-            // Mostrar al jugador todas las opciones del enemigo ACTUAL (mover/atacar)
-            // Asumimos IA = lado negro. Si tu juego usa otro, ajustá aquí.
             Side side = (enemyPiece.pieceController.position.x % 2 == 0 && enemyPiece.pieceController.position.y % 2 == 0) ? Side.Black : Side.White;
 
             RenderHintsForPiece(
@@ -130,7 +128,11 @@ public class IAController : MonoBehaviour
                     out moveTo,
                     out attackTo
                 );
-                if (!canMove) continue;
+                if (!canMove)
+                {
+                    Debug.Log("#IAController#: No can move or attack, setting attack and movement to true");
+                    continue;
+                }
                 moveRenderInstances.ForEach(instance => instance.SetActive(true));
                 // --- GIZMOS: registrar plan para visualizar ---
                 PushDebugPlan(
@@ -149,15 +151,30 @@ public class IAController : MonoBehaviour
                     yield return new WaitForSeconds(1f);
                     Debug.Log("#IAController#: Attacking to: " + attackTo.x + ", " + attackTo.y);
                     TabletopController.Instance.AttackPiece(attackTo.x, attackTo.y, enemyPiece.pieceController.pieceData.damage);
+                    enemyPiece.pieceController.SetAttackBool(true);
                 }
 
                 // Al terminar el turno de esta pieza, limpiar los renders
                 ClearAllRenderHints();
 
                 yield return new WaitForSeconds(1f);
+                TabletopController.Instance.CalculateMovements();
                 break;
             }
+            if (!enemyPiece.pieceController.GetAttackBool())
+            {
+                Debug.Log("#IAController#: No can move or attack, setting attack and movement to true");
+                enemyPiece.pieceController.SetAttackBool(true);
+                enemyPiece.pieceController.SetMovementBool(true);
+                TabletopController.Instance.CalculateMovements();
+                yield return new WaitForSeconds(0.5f);
+            }
         }
+    }
+
+    public void FinishTurn()
+    {
+        StopAllCoroutines();
     }
 
     // ===================== MOVIMIENTO / ATAQUE POSIBLES =====================

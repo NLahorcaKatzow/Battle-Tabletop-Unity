@@ -1,9 +1,9 @@
 using System;
 using UnityEngine;
-using UnityEngine.UI;
 using DG.Tweening;
 using TMPro;
 using Sirenix.OdinInspector;
+using UnityEngine.UI;
 
 public class Timer : MonoBehaviour
 {
@@ -12,7 +12,7 @@ public class Timer : MonoBehaviour
     [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private Image timerFillImage;
     [SerializeField] private Image teamTurnImage;
-    
+    [SerializeField] private Button buttonTurn;
     private float currentTime;
     public bool isRunning = false;
     public bool isPaused = false;
@@ -39,6 +39,7 @@ public class Timer : MonoBehaviour
             timerFillImage.fillAmount = 1f;
         }
         BattleController.Instance.OnTurnChange += ResetTimer;
+        buttonTurn.onClick.AddListener(BattleController.Instance.NextTurn);
     }
     [Button]
     public void StartTimer()
@@ -91,25 +92,32 @@ public class Timer : MonoBehaviour
             timerFillImage.fillAmount = 1f;
         }
         Log("Timer", "Timer reset");
+        TeamTurnSelector();
+    }
+
+    private void TeamTurnSelector()
+    {
         int newPos = BattleController.Instance.GetCurrentTurn() % 2 == 0 ? -130 : 130;
         Color newColor = BattleController.Instance.GetCurrentTurn() % 2 == 0 ? Color.green : Color.red;
+        if (BattleController.Instance.GetCurrentTurn() % 2 == 0) buttonTurn.gameObject.SetActive(true);
+        else buttonTurn.gameObject.SetActive(false);
         // Animate position and color simultaneously
         var rectTransform = teamTurnImage.GetComponent<RectTransform>();
         var image = teamTurnImage.GetComponent<Image>();
-        
+
         if (rectTransform != null && image != null)
         {
             // Position animation
-            rectTransform.DOAnchorPosX(newPos, 0.5f).SetEase(Ease.InOutSine).OnComplete(() => 
+            rectTransform.DOAnchorPosX(newPos, 0.5f).SetEase(Ease.InOutSine).OnComplete(() =>
             {
-                StartTimer(); 
+                StartTimer();
             });
-                // Color animation to white
-                image.DOColor(newColor, 0.5f).SetEase(Ease.InOutSine);
-            
+            // Color animation to white
+            image.DOColor(newColor, 0.5f).SetEase(Ease.InOutSine);
+
         }
     }
-    
+
     public void SetMaxTime(float newMaxTime)
     {
         maxTime = newMaxTime;

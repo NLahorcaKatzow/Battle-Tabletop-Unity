@@ -19,7 +19,7 @@ public class TabletopController : MonoBehaviour
     public static TabletopController Instance { get; private set; }
 
 
-    [SerializeField] private Dictionary<int, PieceDataGO> currentPiecesInTabletop;
+    [ShowInInspector] private Dictionary<int, PieceDataGO> currentPiecesInTabletop;
     [SerializeField] private TabletopUI tabletopUI;
 
     public delegate void PieceSelected(int id);
@@ -46,13 +46,14 @@ public class TabletopController : MonoBehaviour
     {
         Debug.Log("TabletopController: SetTurn, turn: " + turn);
         tabletopUI.HideAll();
+        IAController.Instance.FinishTurn();
+
         if (turn % 2 == 1)
         {
-            //TODO: es turno del enemigo
             SetAllPlayerPiecesInactives();
-            //TODO: iniciar IA
-            var enemyPieces = currentPiecesInTabletop.Values.Where(piece => piece.pieceController.isEnemy).ToList();
-            var playerPieces = currentPiecesInTabletop.Values.Where(piece => !piece.pieceController.isEnemy).ToList();
+
+            var enemyPieces = currentPiecesInTabletop.Values.Where(piece => piece.pieceController.isEnemy && !piece.pieceController.isDead).ToList();
+            var playerPieces = currentPiecesInTabletop.Values.Where(piece => !piece.pieceController.isEnemy && !piece.pieceController.isDead).ToList();
             IAController.Instance.StartCoroutine(IAController.Instance.Initialize(enemyPieces, playerPieces));
             return;
         }
@@ -63,7 +64,11 @@ public class TabletopController : MonoBehaviour
     {
         foreach (var piece in currentPiecesInTabletop)
         {
-            if (piece.Value.pieceController.isEnemy) continue;
+            if (piece.Value.pieceController.isEnemy)
+            {
+                piece.Value.pieceController.SetPieceActive();
+                continue;
+            }
             piece.Value.pieceController.SetPieceInactive();
         }
     }
@@ -73,9 +78,27 @@ public class TabletopController : MonoBehaviour
     {
         foreach (var piece in currentPiecesInTabletop)
         {
-            if (piece.Value.pieceController.isEnemy) continue;
+            if (piece.Value.pieceController.isEnemy)
+            {
+                piece.Value.pieceController.SetPieceInactive();
+                continue;
+            }
             piece.Value.pieceController.SetPieceActive();
         }
+    }
+
+    public void CalculateMovements()
+    {
+        if (!CanMovePieces())
+        {
+            BattleController.Instance.NextTurn();
+            return;
+        }
+    }
+
+    public bool CanMovePieces()
+    {
+        return currentPiecesInTabletop.Values.Any(piece => !piece.pieceController.isDead && (!piece.pieceController.isMoving || !piece.pieceController.isAttacking));
     }
 
     private void Update()
@@ -103,6 +126,7 @@ public class TabletopController : MonoBehaviour
             {
                 tabletopUI.HideAll();
                 SetAllPiecesTangible();
+                OnPieceSelected?.Invoke(-1);
             }
         }
     }
@@ -148,7 +172,7 @@ public class TabletopController : MonoBehaviour
     {
         //TODO: ataque a un espacio
         //TODO: obtener una pieza por su posicion en x,y
-        var piece = currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.GetPosition() == new Vector2Int(x, y));
+        var piece = currentPiecesInTabletop.FirstOrDefault(piece => !piece.Value.pieceController.isDead && piece.Value.pieceController.GetPosition() == new Vector2Int(x, y));
         if (piece.Value == null)
         {
             Debug.Log("TabletopController: No piece found at: " + x + ", " + y);

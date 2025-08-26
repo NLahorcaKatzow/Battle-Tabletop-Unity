@@ -30,11 +30,12 @@ public class TabletopUI : BaseController
             if(TabletopController.Instance.GetCurrentPlayerPieces().ContainsKey(savedPosition.Key)) continue;
             Log("TabletopController", "Instantiating piece: " + savedPosition.Key);
             var piece = Instantiate(piecePrefab, grid.GetCellCenterWorld(new Vector3Int(savedPosition.Value.x, 0, savedPosition.Value.y)), Quaternion.identity, grid.transform);
-            piece.GetComponent<PieceController>().SetPieceData(ResourceController.Instance.GetPieceDatabyId(savedPosition.Value.type));
-            piece.GetComponent<PieceController>().SetPosition(new Vector2Int(savedPosition.Value.x, savedPosition.Value.y));
+            var pieceData = piece.GetComponent<PieceController>();
+            pieceData.SetPieceData(ResourceController.Instance.GetPieceDatabyId(savedPosition.Value.type));
+            pieceData.SetPosition(new Vector2Int(savedPosition.Value.x, savedPosition.Value.y));
             TabletopController.Instance.GetCurrentPlayerPieces().Add(savedPosition.Key, new PieceDataGO
             {
-                pieceController = piece.GetComponent<PieceController>(),
+                pieceController = pieceData,
                 go = piece
             });
         }
@@ -43,11 +44,13 @@ public class TabletopUI : BaseController
             if(TabletopController.Instance.GetCurrentPlayerPieces().ContainsKey(enemyPosition.Key)) continue;
             Log("TabletopController", "Instantiating enemy piece: " + enemyPosition.Key);
             var enemyPiece = Instantiate(piecePrefab, grid.GetCellCenterWorld(new Vector3Int(enemyPosition.Value.x, 0, enemyPosition.Value.y)), Quaternion.identity, grid.transform);
-            enemyPiece.GetComponent<PieceController>().SetPieceData(ResourceController.Instance.GetPieceDatabyId(enemyPosition.Value.type), true);
-            enemyPiece.GetComponent<PieceController>().SetPosition(new Vector2Int(enemyPosition.Value.x, enemyPosition.Value.y));
+            var pieceData = enemyPiece.GetComponent<PieceController>();
+            pieceData.SetPieceData(ResourceController.Instance.GetPieceDatabyId(enemyPosition.Value.type), true);
+            pieceData.SetPosition(new Vector2Int(enemyPosition.Value.x, enemyPosition.Value.y));
+            pieceData.render.GetComponentInChildren<Renderer>().material.SetColor("_Mid_Color", Color.grey);
             TabletopController.Instance.GetCurrentPlayerPieces().Add(enemyPosition.Key, new PieceDataGO
             {
-                pieceController = enemyPiece.GetComponent<PieceController>(),
+                pieceController = pieceData,
                 go = enemyPiece
             });
         }
