@@ -1226,9 +1226,69 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2445127382234757073, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontSize
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 2445127382234757073, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2445127382234757073, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 3480661822345479839, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontSize
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 3480661822345479839, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3480661822345479839, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 4932600056643285966, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontSize
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 4932600056643285966, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4932600056643285966, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 16
+      objectReference: {fileID: 0}
     - target: {fileID: 5143256965539105586, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
       propertyPath: m_Name
       value: TabletopUI
+      objectReference: {fileID: 0}
+    - target: {fileID: 5977248942285044864, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontSize
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 5977248942285044864, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5977248942285044864, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 7560953954904809753, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontSize
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 7560953954904809753, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7560953954904809753, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 8128766202253624080, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
       propertyPath: grid
@@ -1238,6 +1298,42 @@ PrefabInstance:
       propertyPath: tabletopGO
       value: 
       objectReference: {fileID: 1342184574}
+    - target: {fileID: 8200538652046093184, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontSize
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 8200538652046093184, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8200538652046093184, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 9134230306319298688, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontSize
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 9134230306319298688, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9134230306319298688, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 9159540130668430683, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontSize
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 9159540130668430683, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9159540130668430683, guid: b2e334a0d5bea2045864fa2f60c94ac6, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 16
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

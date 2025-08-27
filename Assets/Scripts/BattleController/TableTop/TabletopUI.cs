@@ -20,9 +20,25 @@ public class TabletopUI : BaseController
     [SerializeField] private GameObject attackCellPrefab;
     [SerializeField] private GameObject timerGO;
     [SerializeField] private Timer timerComponent;
+    
+    // TextMeshProUGUI variables for piece info display
+    [SerializeField] private TextMeshProUGUI idText;
+    [SerializeField] private TextMeshProUGUI nameText;
+    [SerializeField] private TextMeshProUGUI damageText;
+    [SerializeField] private TextMeshProUGUI maxHealthText;
+    [SerializeField] private TextMeshProUGUI movementTypeText;
+    [SerializeField] private TextMeshProUGUI movementLengthText;
+    [SerializeField] private TextMeshProUGUI rangeText;
+    [SerializeField] private TextMeshProUGUI specialText;
+    
     Dictionary<Vector2Int, GameObject> actionCells = new Dictionary<Vector2Int, GameObject>();
     Dictionary<Vector2Int, GameObject> attackCells = new Dictionary<Vector2Int, GameObject>();
     [SerializeField] private PieceController currentPiece;
+    
+    
+    
+    
+    
 
     public void InitializateUI(Dictionary<int, SavedPosition> savedPositions, Dictionary<int, SavedPosition> enemyPositions)
     {
@@ -74,7 +90,18 @@ public class TabletopUI : BaseController
     }
 
     public void ShowPieceInfo(PieceController pieceController){
-        //TODO: Show piece info
+        if (pieceController == null || pieceController.pieceData == null) return;
+        
+        // Set all the text fields with piece data
+        if (idText != null) idText.text = $"ID: {pieceController.pieceData.id}";
+        if (nameText != null) nameText.text = $"Name: {pieceController.pieceData.name}";
+        if (damageText != null) damageText.text = $"Damage: {pieceController.pieceData.damage}";
+        if (maxHealthText != null) maxHealthText.text = $"Max Health: {pieceController.pieceData.maxHealth}";
+        if (movementTypeText != null) movementTypeText.text = $"Movement Type: {pieceController.pieceData.movementType}";
+        if (movementLengthText != null) movementLengthText.text = $"Movement Length: {pieceController.pieceData.movementLength}";
+        if (rangeText != null) rangeText.text = $"Range: {pieceController.pieceData.range}";
+        if (specialText != null) specialText.text = $"Special: {pieceController.pieceData.special}";
+        
         pieceInfoPanel.SetActive(true);
     }
     

@@ -9,6 +9,13 @@
       },
       "hash": "38fecf55e4fd94ccfe58a92ed8ad1a529ba1694e"
     },
+    "com.brunomikoski.animationsequencer": {
+      "version": "https://github.com/brunomikoski/Animation-Sequencer.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "1854a5df93065f5a3ad617ae4a5e2afe66110bb9"
+    },
     "com.unity.addressables": {
       "version": "2.2.2",
       "depth": 0,
@@ -132,6 +139,15 @@
       "depth": 1,
       "source": "registry",
       "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.postprocessing": {
+      "version": "3.4.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.physics": "1.0.0"
+      },
       "url": "https://packages.unity.com"
     },
     "com.unity.profiling.core": {
