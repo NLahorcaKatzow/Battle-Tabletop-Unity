@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace DamageNumbersPro.Demo
@@ -100,7 +99,7 @@ namespace DamageNumbersPro.Demo
 
                     if(fade.alpha >= 0.999f)
                     {
-                        SceneManager.LoadScene(loadScene);
+                        UnityEngine.SceneManagement.SceneManager.LoadScene(loadScene);
                         enabled = false;
                     }
 

@@ -5,7 +5,7 @@ using DamageNumbersPro;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class PieceController : MonoBehaviour
+public class PieceController : MonoBehaviour, IDamageable
 {
     public int generatedId;
     public PieceDataClass pieceData;
@@ -20,7 +20,8 @@ public class PieceController : MonoBehaviour
     public bool isMoving = false;
     public bool isAttacking = false;
     public bool isEnemy = false;
-    public bool isDead = false;
+
+    public bool IsAlive => currentHealth > 0;
 
 
     private void Awake()
@@ -89,18 +90,18 @@ public class PieceController : MonoBehaviour
     }
 
 
-    public void ApplyDamage(int damage)
+    public void TakeDamage(int amount)
     {
-        if (damage == 0)
+        if (amount == 0)
         {
             Debug.Log("PieceController: Damage is 0, skipping");
             return;
         }
         Debug.Log("PieceController: Health: " + currentHealth + " Max Health: " + pieceData.maxHealth);
-        Debug.Log("PieceController: Applying damage: " + damage + " relative damage: " + (float)(currentHealth - damage) / (float)pieceData.maxHealth);
+        Debug.Log("PieceController: Applying damage: " + amount + " relative damage: " + (float)(currentHealth - amount) / (float)pieceData.maxHealth);
         damageSlider.transform.parent.gameObject.SetActive(true);
-        damageNumberPrefab.Spawn(Camera.main.WorldToScreenPoint(transform.position), damage);
-        currentHealth -= damage;
+        damageNumberPrefab.Spawn(Camera.main.WorldToScreenPoint(transform.position), amount);
+        currentHealth -= amount;
         damageSlider.value = (float)currentHealth / (float)pieceData.maxHealth;
 
         var rend = render.GetComponentInChildren<Renderer>();
@@ -111,24 +112,60 @@ public class PieceController : MonoBehaviour
         if (currentHealth <= 0)
         {
             damageSlider.value = 0;
-            DestroyPiece();
+            DestroyPiece(() =>
+            {
+                TabletopController.Instance.RecalculateAllPiecesLife();
+            });
         }
 
     }
 
-    public void DestroyPiece()
+    public void Heal(int amount)
+    {
+        if (amount <= 0)
+        {
+            Debug.Log("PieceController: Heal amount is 0 or negative, skipping");
+            return;
+        }
+
+        if (!IsAlive)
+        {
+            Debug.Log("PieceController: Cannot heal dead piece");
+            return;
+        }
+
+        Debug.Log("PieceController: Healing for: " + amount);
+        currentHealth += amount;
+        
+        // Cap health at max health
+        if (currentHealth > pieceData.maxHealth)
+        {
+            currentHealth = pieceData.maxHealth;
+        }
+        
+        damageSlider.transform.parent.gameObject.SetActive(true);
+        damageSlider.value = (float)currentHealth / (float)pieceData.maxHealth;
+
+        var rend = render.GetComponentInChildren<Renderer>();
+        TweenUtils.Flash(rend, "_Mid_Color", Color.green, 0.3f);
+    }
+
+    public void DestroyPiece(UnityAction onComplete = null)
     {
 
         Debug.Log($"Destroying piece: {pieceData.name}");
         transform.DOScale(0, 0.5f).SetEase(Ease.InOutSine).OnComplete(() =>
         {
-            isDead = true;
+            currentHealth = 0;
+            onComplete?.Invoke();
         });
     }
 
     public void RevivePiece()
     {
-        isDead = false;
+        currentHealth = pieceData.maxHealth;
+        damageSlider.value = 1.0f;
+        
         transform.DOScale(1, 0.5f).SetEase(Ease.InOutSine);
     }
 

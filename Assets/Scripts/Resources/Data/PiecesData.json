@@ -7,7 +7,7 @@
     "movementType": 3,
     "movementLength": 1,
     "range": 1,
-    "special": 0
+    "special": 1
   },
   {
     "id": 2,

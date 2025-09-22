@@ -100,7 +100,7 @@ public class IAController : MonoBehaviour
 
         for (int i = 0; i < enemyPieces.Count; i++)
         {
-            var randomPlayerPiece = playerPieces.Where(x => !x.pieceController.isDead).OrderBy(x => Random.value).ToList();
+            var randomPlayerPiece = playerPieces.Where(x => x.pieceController.IsAlive).OrderBy(x => Random.value).ToList();
             var enemyPiece = enemyPieces[i];
 
             Side side = (enemyPiece.pieceController.position.x % 2 == 0 && enemyPiece.pieceController.position.y % 2 == 0) ? Side.Black : Side.White;
@@ -134,7 +134,7 @@ public class IAController : MonoBehaviour
                     continue;
                 }
                 moveRenderInstances.ForEach(instance => instance.SetActive(true));
-                // --- GIZMOS: registrar plan para visualizar ---
+                // GIZMOS
                 PushDebugPlan(
                     enemyPiece.pieceController,
                     enemyPiece.pieceController.position,

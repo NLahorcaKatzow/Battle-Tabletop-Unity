@@ -25,6 +25,8 @@ public class TabletopController : MonoBehaviour
     public delegate void PieceSelected(int id);
     public event PieceSelected OnPieceSelected;
 
+    public bool finishCombat = false;
+
     //guardado de posiciones
     // calculo de movimiento
     private void Awake()
@@ -32,13 +34,25 @@ public class TabletopController : MonoBehaviour
         Instance = this;
     }
 
-    public void Initializate()
+    public void Initializate(int newTurn)
     {
+        finishCombat = false;
+        if (currentPiecesInTabletop != null) ClearTabletop();
         Debug.Log("TabletopController: Initializated");
         Debug.Log("TabletopController: " + ResourceController.Instance.piecesData);
         currentPiecesInTabletop = new Dictionary<int, PieceDataGO>();
-        Dictionary<int, SavedPosition> savedPositions = ResourceController.Instance.GetSavedPositions();
-        Dictionary<int, SavedPosition> enemyPositions = ResourceController.Instance.GetEnemyPositions();
+        Dictionary<int, SavedPosition> savedPositions = null;
+        Dictionary<int, SavedPosition> enemyPositions = null;
+        if (newTurn == 0)
+        {
+            savedPositions = ResourceController.Instance.GetSavedPositions();
+            enemyPositions = ResourceController.Instance.GetEnemyPositions();
+        }
+        else
+        {
+            savedPositions = ResourceController.Instance.GetSavedPositionsNewTurn();
+            enemyPositions = ResourceController.Instance.GetEnemyPositionsNewTurn();
+        }
         tabletopUI.InitializateUI(savedPositions, enemyPositions);
     }
 
@@ -52,8 +66,8 @@ public class TabletopController : MonoBehaviour
         {
             SetAllPlayerPiecesInactives();
 
-            var enemyPieces = currentPiecesInTabletop.Values.Where(piece => piece.pieceController.isEnemy && !piece.pieceController.isDead).ToList();
-            var playerPieces = currentPiecesInTabletop.Values.Where(piece => !piece.pieceController.isEnemy && !piece.pieceController.isDead).ToList();
+            var enemyPieces = currentPiecesInTabletop.Values.Where(piece => piece.pieceController.isEnemy && piece.pieceController.IsAlive).ToList();
+            var playerPieces = currentPiecesInTabletop.Values.Where(piece => !piece.pieceController.isEnemy && piece.pieceController.IsAlive).ToList();
             IAController.Instance.StartCoroutine(IAController.Instance.Initialize(enemyPieces, playerPieces));
             return;
         }
@@ -98,11 +112,12 @@ public class TabletopController : MonoBehaviour
 
     public bool CanMovePieces()
     {
-        return currentPiecesInTabletop.Values.Any(piece => !piece.pieceController.isDead && (!piece.pieceController.isMoving || !piece.pieceController.isAttacking));
+        return currentPiecesInTabletop.Values.Any(piece => piece.pieceController.IsAlive && (!piece.pieceController.isMoving || !piece.pieceController.isAttacking));
     }
 
     private void Update()
     {
+        if (finishCombat) return;
         if (Input.GetMouseButtonDown(0)) // Left mouse button click
         {
             // Check if click is over UI element
@@ -159,7 +174,7 @@ public class TabletopController : MonoBehaviour
 
     public bool IsPositionEmpty(Vector2Int position)
     {
-        return currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.GetPosition() == position && !piece.Value.pieceController.isDead).Value == null;
+        return currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.GetPosition() == position && piece.Value.pieceController.IsAlive).Value == null;
     }
 
     public Grid GetGrid()
@@ -172,7 +187,7 @@ public class TabletopController : MonoBehaviour
     {
         //TODO: ataque a un espacio
         //TODO: obtener una pieza por su posicion en x,y
-        var piece = currentPiecesInTabletop.FirstOrDefault(piece => !piece.Value.pieceController.isDead && piece.Value.pieceController.GetPosition() == new Vector2Int(x, y));
+        var piece = currentPiecesInTabletop.FirstOrDefault(piece => piece.Value.pieceController.IsAlive && piece.Value.pieceController.GetPosition() == new Vector2Int(x, y));
         if (piece.Value == null)
         {
             Debug.Log("TabletopController: No piece found at: " + x + ", " + y);
@@ -181,7 +196,7 @@ public class TabletopController : MonoBehaviour
         }
         //TODO: quitar vida a la pieza
         Debug.Log("TabletopController: Attacking piece at: " + x + ", " + y);
-        piece.Value.pieceController.ApplyDamage(damage);
+        piece.Value.pieceController.TakeDamage(damage);
     }
     [Button]
     public void DestroyPiece(int id)
@@ -193,7 +208,10 @@ public class TabletopController : MonoBehaviour
             Debug.Log("TabletopController: Piece " + id + " not found");
             return;
         }
-        piece.pieceController.DestroyPiece();
+        piece.pieceController.DestroyPiece(() =>
+        {
+            RecalculateAllPiecesLife();
+        });
     }
     [Button]
     public void RevivePiece(int id)
@@ -208,7 +226,7 @@ public class TabletopController : MonoBehaviour
     {
         foreach (var piece in currentPiecesInTabletop)
         {
-            if (piece.Value.pieceController.generatedId == currentPieceId || piece.Value.pieceController.isDead) continue;
+            if (piece.Value.pieceController.generatedId == currentPieceId || !piece.Value.pieceController.IsAlive) continue;
             piece.Value.go.layer = LayerMask.NameToLayer("Ignore Raycast");
         }
     }
@@ -225,7 +243,17 @@ public class TabletopController : MonoBehaviour
     {
         //TODO:
     }
-
+    public void RecalculateAllPiecesLife()
+    {
+        var playerPiecesLife = currentPiecesInTabletop.Values.Where(piece => !piece.pieceController.isEnemy && piece.pieceController.IsAlive).Count();
+        var enemyPiecesLife = currentPiecesInTabletop.Values.Where(piece => piece.pieceController.isEnemy && piece.pieceController.IsAlive).Count();
+        if (playerPiecesLife == 0 || enemyPiecesLife == 0)
+        {
+            finishCombat = true;
+            ClearTabletop();
+            BattleController.Instance.FinishBattle();
+        }
+    }
 
     #region Internal Methods
     internal void ClearTabletop()
@@ -237,6 +265,8 @@ public class TabletopController : MonoBehaviour
         currentPiecesInTabletop.Clear();
         tabletopUI.HideTabletop();
     }
+
+
     #endregion
 
 

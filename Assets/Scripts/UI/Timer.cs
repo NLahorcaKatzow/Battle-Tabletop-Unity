@@ -1,9 +1,9 @@
 using System;
 using UnityEngine;
-using DG.Tweening;
 using TMPro;
 using Sirenix.OdinInspector;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class Timer : MonoBehaviour
 {

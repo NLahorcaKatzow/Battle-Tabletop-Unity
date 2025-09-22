@@ -28,11 +28,11 @@ public class BattleController : BaseController
     }
 
     [Button]
-    public void InitializeCombat(int newTurn = 1)
+    public void InitializeCombat(int newTurn = 0)
     {
         //TODO: Initialize combat
         currentTurn = newTurn;
-        TabletopController.Instance.Initializate();
+        TabletopController.Instance.Initializate(newTurn);
         TabletopController.Instance.SetTurn(currentTurn);
     }
 
@@ -46,12 +46,31 @@ public class BattleController : BaseController
         //TODO: tiempo agotado
         NextTurn();
     }
+    
+    public void FinishBattle()
+    {
+        //TODO: terminar la batalla
+        int teamWinner = GetCurrentTurn() % 2;
+        if(teamWinner == 0)
+        {
+            Debug.Log("BattleController: Player Team is the winner");
+            //TODO: mostrar la pantalla de vencedor
+            //SceneManager.Instance.ShowVictoryUI();
+            SceneManager.Instance.LoadNextLevel(false);
+        }
+        else
+        {
+            Debug.Log("BattleController: Enemy Team is the winner");
+            //TODO: mostrar la pantalla de derrota
+            SceneManager.Instance.ShowDeathUI();
+        }
+    }
 
 
 
     public override void Initializate()
     {
         Debug.Log("BattleController: Initializated");
-        InitializeCombat();
+        //InitializeCombat();
     }
 }

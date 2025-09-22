@@ -147,7 +147,7 @@ public class TabletopUI : BaseController
     public void HideAll(){
         HidePieceInfo();
         HidePieceActions();
-        
+        timerComponent.StopTimer();
     }
     
     public void HideTabletop(){
@@ -279,8 +279,6 @@ public class TabletopUI : BaseController
     
     private void CalculateTowerMovementActions(Vector2Int currentPosition, int movementLength, bool isAttack = false)
     {
-        // Tower moves horizontally and vertically in all 4 directions
-        // Straight directions: (1,0), (-1,0), (0,1), (0,-1)
         Vector2Int[] straightDirections = {
             new Vector2Int(1, 0),   // Right
             new Vector2Int(-1, 0),  // Left

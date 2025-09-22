@@ -12,6 +12,8 @@ public class ResourceController : MonoBehaviour
     [ShowInInspector]public List<PieceDataClass> piecesData;
     [ShowInInspector]public List<SavedPosition> savedPositions;
     [ShowInInspector] public List<SavedPosition> enemyPositions;
+    [ShowInInspector] public List<SavedPosition> savedPositionsNewTurn;
+    [ShowInInspector] public List<SavedPosition> enemyPositionsNewTurn;
     [ShowInInspector] public GameConfigs gameConfigs;
     [SerializeField] private string enemyPositionsPresetResourcePath = "Data/EnemyPositionsPreset1";
     public event Action OnCompleteResourcesLoaded;
@@ -19,6 +21,7 @@ public class ResourceController : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        DontDestroyOnLoad(gameObject);
     }
     
     private void Start()
@@ -36,6 +39,8 @@ public class ResourceController : MonoBehaviour
             LoadPiecesData();
             LoadSavedPositions();
             LoadEnemyPositions();
+            LoadSavedPositionsNewTurn();
+            LoadEnemyPositionsNewTurn();
             LoadGameConfigs();
             IsReady = true;
             OnCompleteResourcesLoaded?.Invoke();
@@ -70,6 +75,17 @@ public class ResourceController : MonoBehaviour
         }
         return savedPositionsDict;
     }
+    public Dictionary<int, SavedPosition> GetSavedPositionsNewTurn()
+    {
+        Dictionary<int, SavedPosition> savedPositionsDict = new Dictionary<int, SavedPosition>();
+        foreach(var position in savedPositionsNewTurn){
+            if (!savedPositionsDict.ContainsKey(position.id))
+            {
+                savedPositionsDict.Add(position.id, position);
+            }
+        }
+        return savedPositionsDict;
+    }
 
     public Dictionary<int, SavedPosition> GetEnemyPositions()
     {
@@ -83,6 +99,17 @@ public class ResourceController : MonoBehaviour
             else
             {
                 Debug.LogWarning($"Duplicate enemy key found: {position.id}. Skipping duplicate entry.");
+            }
+        }
+        return enemyPositionsDict;
+    }
+    public Dictionary<int, SavedPosition> GetEnemyPositionsNewTurn()
+    {
+        Dictionary<int, SavedPosition> enemyPositionsDict = new Dictionary<int, SavedPosition>();
+        foreach(var position in enemyPositionsNewTurn){
+            if (!enemyPositionsDict.ContainsKey(position.id))
+            {
+                enemyPositionsDict.Add(position.id, position);
             }
         }
         return enemyPositionsDict;
@@ -110,6 +137,13 @@ public class ResourceController : MonoBehaviour
         savedPositions = JsonConvert.DeserializeObject<List<SavedPosition>>(json);
         Debug.Log("SavedPositions loaded");
         Debug.Log(JsonConvert.SerializeObject(savedPositions));
+    }    
+    private void LoadSavedPositionsNewTurn()
+    {
+        string json = Resources.Load<TextAsset>("Data/PlayerSavedPositions2").text;
+        savedPositionsNewTurn = JsonConvert.DeserializeObject<List<SavedPosition>>(json);
+        Debug.Log("SavedPositions loaded");
+        Debug.Log(JsonConvert.SerializeObject(savedPositionsNewTurn));
     }
 
     private void LoadEnemyPositions()
@@ -124,6 +158,19 @@ public class ResourceController : MonoBehaviour
         enemyPositions = JsonConvert.DeserializeObject<List<SavedPosition>>(textAsset.text);
         Debug.Log($"EnemyPositions loaded from {enemyPositionsPresetResourcePath}");
         Debug.Log(JsonConvert.SerializeObject(enemyPositions));
+    }
+    private void LoadEnemyPositionsNewTurn()
+    {
+        var textAsset = Resources.Load<TextAsset>("Data/EnemyPositionsPreset2");
+        if (textAsset == null)
+        {
+            Debug.LogError($"Enemy positions preset not found at 'EnemyPositionsPreset2'.");
+            enemyPositionsNewTurn = new List<SavedPosition>();
+            return;
+        }
+        enemyPositionsNewTurn = JsonConvert.DeserializeObject<List<SavedPosition>>(textAsset.text);
+        Debug.Log($"EnemyPositions loaded from EnemyPositionsPreset2");
+        Debug.Log(JsonConvert.SerializeObject(enemyPositionsNewTurn));
     }
 
     private void LoadGameConfigs()
