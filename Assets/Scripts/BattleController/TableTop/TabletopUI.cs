@@ -147,12 +147,12 @@ public class TabletopUI : BaseController
     public void HideAll(){
         HidePieceInfo();
         HidePieceActions();
-        timerComponent.StopTimer();
     }
     
     public void HideTabletop(){
         tabletopUI.SetActive(false);
         HideAll();
+        timerComponent.StopTimer();
         tabletopGO.SetActive(false);
     }
     

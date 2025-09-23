@@ -39,6 +39,7 @@ public class Timer : MonoBehaviour
             timerFillImage.fillAmount = 1f;
         }
         BattleController.Instance.OnTurnChange += ResetTimer;
+        buttonTurn.onClick.RemoveAllListeners();
         buttonTurn.onClick.AddListener(BattleController.Instance.NextTurn);
     }
     [Button]
@@ -77,6 +78,7 @@ public class Timer : MonoBehaviour
     {
         isRunning = false;
         isPaused = false;
+        BattleController.Instance.OnTurnChange -= ResetTimer;
         Log("Timer", "Timer stopped");
     }
     

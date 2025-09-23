@@ -8,7 +8,7 @@ public class BattleController : BaseController
 
     public static BattleController Instance;
     public int currentTurn = 0;
-
+    public int currentGameIndex = 0;
     public event Action OnTurnChange;
 
     [Button]
@@ -21,7 +21,10 @@ public class BattleController : BaseController
         TabletopController.Instance.SetTurn(currentTurn);
         
     }
-
+    public void SetCurrentGameIndex(int newGameIndex)
+    {
+        currentGameIndex = newGameIndex;
+    }
     void Awake()
     {
         Instance = this;
@@ -32,7 +35,7 @@ public class BattleController : BaseController
     {
         //TODO: Initialize combat
         currentTurn = newTurn;
-        TabletopController.Instance.Initializate(newTurn);
+        TabletopController.Instance.Initializate(currentGameIndex);
         TabletopController.Instance.SetTurn(currentTurn);
     }
 
@@ -56,7 +59,7 @@ public class BattleController : BaseController
             Debug.Log("BattleController: Player Team is the winner");
             //TODO: mostrar la pantalla de vencedor
             //SceneManager.Instance.ShowVictoryUI();
-            SceneManager.Instance.LoadNextLevel(false);
+            SceneManager.Instance.LoadNextLevel(currentGameIndex == 2);
         }
         else
         {

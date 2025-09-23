@@ -353,7 +353,8 @@ public class SceneManager : MonoBehaviour
             DOVirtual.DelayedCall(0.1f, () => {
                 FadeIn(() => {
                     isTransitioning = false;
-                    BattleController.Instance.InitializeCombat(levelIndex - 1);
+                    BattleController.Instance.SetCurrentGameIndex(levelIndex);
+                    BattleController.Instance.InitializeCombat(levelIndex % 2 + 1);
                     if (debugMode)
                         Debug.Log($"Successfully loaded level: {levelScenes[levelIndex]}");
                 });

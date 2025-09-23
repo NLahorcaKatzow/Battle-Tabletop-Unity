@@ -34,7 +34,7 @@ public class TabletopController : MonoBehaviour
         Instance = this;
     }
 
-    public void Initializate(int newTurn)
+    public void Initializate(int indexGame)
     {
         finishCombat = false;
         if (currentPiecesInTabletop != null) ClearTabletop();
@@ -43,16 +43,23 @@ public class TabletopController : MonoBehaviour
         currentPiecesInTabletop = new Dictionary<int, PieceDataGO>();
         Dictionary<int, SavedPosition> savedPositions = null;
         Dictionary<int, SavedPosition> enemyPositions = null;
-        if (newTurn == 0)
+        switch (indexGame)
         {
-            savedPositions = ResourceController.Instance.GetSavedPositions();
-            enemyPositions = ResourceController.Instance.GetEnemyPositions();
+            case 1:
+                savedPositions = ResourceController.Instance.GetSavedPositions();
+                enemyPositions = ResourceController.Instance.GetEnemyPositions();
+                break;
+            case 2:
+                savedPositions = ResourceController.Instance.GetSavedPositionsNewTurn();
+                enemyPositions = ResourceController.Instance.GetEnemyPositionsNewTurn();
+                break;
+            default:
+            Debug.LogError("TabletopController: Index game not found, indexGame: " + indexGame);
+                savedPositions = ResourceController.Instance.GetSavedPositions();
+                enemyPositions = ResourceController.Instance.GetEnemyPositions();
+                break;
         }
-        else
-        {
-            savedPositions = ResourceController.Instance.GetSavedPositionsNewTurn();
-            enemyPositions = ResourceController.Instance.GetEnemyPositionsNewTurn();
-        }
+        
         tabletopUI.InitializateUI(savedPositions, enemyPositions);
     }
 
