@@ -15,6 +15,7 @@ public class ResourceController : MonoBehaviour
     [ShowInInspector] public List<SavedPosition> savedPositionsNewTurn;
     [ShowInInspector] public List<SavedPosition> enemyPositionsNewTurn;
     [ShowInInspector] public GameConfigs gameConfigs;
+    [ShowInInspector] public List<HealthPickUpClass> healthPickUps;
     [SerializeField] private string enemyPositionsPresetResourcePath = "Data/EnemyPositionsPreset1";
     public event Action OnCompleteResourcesLoaded;
     public bool IsReady { get; private set; }
@@ -36,12 +37,14 @@ public class ResourceController : MonoBehaviour
             piecesData = new List<PieceDataClass>();
             savedPositions = new List<SavedPosition>();
             enemyPositions = new List<SavedPosition>();
+            healthPickUps = new List<HealthPickUpClass>();
             LoadPiecesData();
             LoadSavedPositions();
             LoadEnemyPositions();
             LoadSavedPositionsNewTurn();
             LoadEnemyPositionsNewTurn();
             LoadGameConfigs();
+            LoadHealthPickUps();
             IsReady = true;
             OnCompleteResourcesLoaded?.Invoke();
             Debug.Log("Resources loaded");
@@ -120,6 +123,21 @@ public class ResourceController : MonoBehaviour
         return gameConfigs;
     }
     
+    public List<HealthPickUpClass> GetHealthPickUps()
+    {
+        return healthPickUps;
+    }
+    
+    public HealthPickUpClass GetHealthPickUpById(int id)
+    {
+        return healthPickUps.FirstOrDefault(pickup => pickup.id == id);
+    }
+    
+    public List<HealthPickUpClass> GetHealthPickUpsByRarity(PickUpRarity rarity)
+    {
+        return healthPickUps.Where(pickup => pickup.rarity == rarity).ToList();
+    }
+    
     #region Internal Methods
 
     private void LoadPiecesData()
@@ -179,6 +197,20 @@ public class ResourceController : MonoBehaviour
         gameConfigs = JsonConvert.DeserializeObject<GameConfigs>(textAsset.text);
         Debug.Log("GameConfigs loaded");
         Debug.Log(JsonConvert.SerializeObject(gameConfigs));
+    }
+    
+    private void LoadHealthPickUps()
+    {
+        var textAsset = Resources.Load<TextAsset>("Data/HealthPickUps");
+        if (textAsset == null)
+        {
+            Debug.LogError("HealthPickUps data not found at 'Data/HealthPickUps'.");
+            healthPickUps = new List<HealthPickUpClass>();
+            return;
+        }
+        healthPickUps = JsonConvert.DeserializeObject<List<HealthPickUpClass>>(textAsset.text);
+        Debug.Log("HealthPickUps loaded");
+        Debug.Log(JsonConvert.SerializeObject(healthPickUps));
     }
     
     #endregion

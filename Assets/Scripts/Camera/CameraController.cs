@@ -241,6 +241,7 @@ public class CameraController : MonoBehaviour
         Debug.Log($"Camera initialized at center of plane with normal: {playerNormal}");
     }
     
+#if UNITY_EDITOR
     void OnDrawGizmosSelected()
     {
         // Draw a sphere at origin to visualize the 30-unit distance
@@ -261,4 +262,5 @@ public class CameraController : MonoBehaviour
             Gizmos.DrawLine(transform.position, player.position);
         }
     }
+#endif
 }

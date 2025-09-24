@@ -81,6 +81,12 @@ public class IAController : MonoBehaviour
 
         foreach (var c in attackSquares)
             SpawnRender(attackRender, GridToWorld(c), attackRenderInstances);
+
+    }
+    Vector3 GridToWorld(Vector2Int c)
+    {
+        Vector3 newPos = TabletopController.Instance.GetGrid().GetCellCenterWorld(new Vector3Int(c.x, 0, c.y));
+        return newPos;
     }
 
     // ===================== LOOP PRINCIPAL IA =====================
@@ -750,6 +756,7 @@ public class IAController : MonoBehaviour
     /// <summary> Limpia todos los planes dibujados. </summary>
     public void ClearDebugPlans() => _debugPlans.Clear();
 
+#if UNITY_EDITOR
     void OnDrawGizmos()
     {
         if (!gizmosEnabled || gizmosOnlyWhenSelected) return;
@@ -760,7 +767,9 @@ public class IAController : MonoBehaviour
         if (!gizmosEnabled || !gizmosOnlyWhenSelected) return;
         DrawGizmosInternal();
     }
+#endif
 
+#if UNITY_EDITOR
     void DrawGizmosInternal()
     {
         if (drawBoardGrid && ResourceController.Instance != null)
@@ -770,8 +779,10 @@ public class IAController : MonoBehaviour
         }
         foreach (var p in _debugPlans) DrawPlan(p);
     }
+#endif
 
     // ---------- Helpers de dibujo ----------
+#if UNITY_EDITOR
     void DrawBoardGrid(int w, int h)
     {
         Gizmos.color = gridColor;
@@ -799,27 +810,19 @@ public class IAController : MonoBehaviour
         {
             DrawArrow(startPos, movePos, arrowHeadSize);
             DrawDisc(movePos, pointRadius);
-#if UNITY_EDITOR
-            Handles.color = cMove;
-            Handles.Label(movePos + LabelOffset(), $"move {p.moveTo.x},{p.moveTo.y}");
-#endif
+            UnityEditor.Handles.color = cMove;
+            UnityEditor.Handles.Label(movePos + LabelOffset(), $"move {p.moveTo.x},{p.moveTo.y}");
         }
 
         Gizmos.color = cAttack;
         DrawArrow(movePos, attackPos, arrowHeadSize * 0.9f);
         DrawCross(attackPos, cellSize * 0.35f);
-#if UNITY_EDITOR
-        Handles.color = cAttack;
-        Handles.Label(attackPos + LabelOffset(), $"attack {p.attackTo.x},{p.attackTo.y} ({p.label})");
-#endif
+        UnityEditor.Handles.color = cAttack;
+        UnityEditor.Handles.Label(attackPos + LabelOffset(), $"attack {p.attackTo.x},{p.attackTo.y} ({p.label})");
     }
 
     // ----- primitivas -----
-    Vector3 GridToWorld(Vector2Int c)
-    {
-        Vector3 newPos = TabletopController.Instance.GetGrid().GetCellCenterWorld(new Vector3Int(c.x, 0, c.y));
-        return newPos;
-    }
+
 
     Vector3 EdgeOffset() => Vector3.zero;
 
@@ -896,5 +899,6 @@ public class IAController : MonoBehaviour
     }
 
     Vector3 LabelOffset() => planeXZ ? new Vector3(0, 0.02f, 0) : new Vector3(0, 0.02f, 0);
+#endif
     // ==================== FIN GIZMOS DEBUG ====================
 }

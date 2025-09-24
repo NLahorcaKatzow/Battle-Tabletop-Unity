@@ -10,13 +10,13 @@ public class SceneManager : MonoBehaviour
     [SerializeField] private string mainMenuScene = "MainMenu";
     [SerializeField] private float transitionDelay = 2f;
     [SerializeField] private bool debugMode = true;
-    
+
     [Header("Transition Effects")]
     [SerializeField] private CanvasGroup fadePanel;
     [SerializeField] private float fadeDuration = 1f;
     [SerializeField] private Ease fadeEaseIn = Ease.InOutQuad;
     [SerializeField] private Ease fadeEaseOut = Ease.InOutQuad;
-    
+
     [Header("Death UI")]
     [SerializeField] private GameObject deathUI;
     [SerializeField] private CanvasGroup deathCanvasGroup;
@@ -28,7 +28,7 @@ public class SceneManager : MonoBehaviour
     [SerializeField] private CanvasGroup victoryCanvasGroup;
     [SerializeField] private Button victoryRestartButton;
     [SerializeField] private float victoryUIFadeDuration = 0.5f;
-    
+
     public static SceneManager Instance;
     private int currentLevelIndex = 0;
     private bool isTransitioning = false;
@@ -40,7 +40,7 @@ public class SceneManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            
+
             if (debugMode)
                 Debug.Log("SceneManager singleton created and set to DontDestroyOnLoad");
         }
@@ -51,27 +51,27 @@ public class SceneManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-        
+
         InitializeCurrentLevel();
     }
-    
+
     void Start()
     {
         if (fadePanel == null)
         {
             SetupFadePanel();
         }
-        
+
         if (restartButton != null)
         {
             restartButton.onClick.AddListener(OnRestartButtonClicked);
         }
     }
-    
+
     private void InitializeCurrentLevel()
     {
         string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-        
+
         for (int i = 0; i < levelScenes.Length; i++)
         {
             if (levelScenes[i] == currentScene)
@@ -82,11 +82,11 @@ public class SceneManager : MonoBehaviour
                 return;
             }
         }
-        
+
         if (debugMode)
             Debug.Log($"Current scene '{currentScene}' not found in level list. Starting from level 0.");
     }
-    
+
     private void SetupFadePanel()
     {
         if (fadePanel == null)
@@ -95,35 +95,36 @@ public class SceneManager : MonoBehaviour
             Canvas canvas = fadeObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 1000;
-            
+
             fadePanel = fadeObject.AddComponent<CanvasGroup>();
             fadePanel.alpha = 0f;
             fadePanel.blocksRaycasts = false;
-            
+
             UnityEngine.UI.Image image = fadeObject.AddComponent<UnityEngine.UI.Image>();
             image.color = Color.black;
-            
+
             DontDestroyOnLoad(fadeObject);
-            
+
             if (debugMode)
                 Debug.Log("Created default fade panel");
         }
     }
-    
+
     private void OnRestartButtonClicked()
     {
         if (debugMode)
             Debug.Log("Restart button clicked - restarting current level");
-        
+
         HideDeathUIAndRestart();
     }
-    
+
     private void HideDeathUIAndRestart()
     {
         if (deathCanvasGroup != null)
         {
             deathCanvasGroup.DOFade(0f, deathUIFadeDuration)
-                .OnComplete(() => {
+                .OnComplete(() =>
+                {
                     deathCanvasGroup.blocksRaycasts = false;
                     deathCanvasGroup.interactable = false;
                     deathUI.SetActive(false);
@@ -137,7 +138,7 @@ public class SceneManager : MonoBehaviour
             RestartCurrentLevel();
         }
     }
-    
+
     public void ShowDeathUI()
     {
         if (isDeathUIActive || isTransitioning)
@@ -146,10 +147,10 @@ public class SceneManager : MonoBehaviour
                 Debug.Log("Death UI already active or transitioning, ignoring ShowDeathUI call");
             return;
         }
-        
+
         ShowDeathUIAnimation();
     }
-    
+
     public void ShowVictoryUI()
     {
         if (isVictoryUIActive || isTransitioning)
@@ -161,22 +162,23 @@ public class SceneManager : MonoBehaviour
 
         ShowVictoryUIAnimation();
     }
-    
+
     private void ShowDeathUIAnimation()
     {
         isDeathUIActive = true;
-        
+
         if (debugMode)
             Debug.Log("Showing death UI");
-        
+
         if (deathUI != null && deathCanvasGroup != null)
         {
             deathUI.SetActive(true);
             deathCanvasGroup.blocksRaycasts = true;
             deathCanvasGroup.interactable = true;
-            
+
             deathCanvasGroup.DOFade(1f, deathUIFadeDuration)
-                .OnComplete(() => {
+                .OnComplete(() =>
+                {
                     if (debugMode)
                         Debug.Log("Death UI fully visible");
                 });
@@ -186,29 +188,31 @@ public class SceneManager : MonoBehaviour
     private void ShowVictoryUIAnimation()
     {
         isVictoryUIActive = true;
-        
+
         if (victoryUI != null && victoryCanvasGroup != null)
         {
             victoryUI.SetActive(true);
             victoryCanvasGroup.blocksRaycasts = true;
             victoryCanvasGroup.interactable = true;
-            
+
             victoryCanvasGroup.DOFade(1f, victoryUIFadeDuration)
-                .OnComplete(() => {
+                .OnComplete(() =>
+                {
                     if (debugMode)
                         Debug.Log("Victory UI fully visible");
                 });
         }
-        
+
     }
 
     private void HideVictoryUIAnimation()
     {
         isVictoryUIActive = false;
-        if(victoryCanvasGroup != null)
+        if (victoryCanvasGroup != null)
         {
             victoryCanvasGroup.DOFade(0f, victoryUIFadeDuration)
-                .OnComplete(() => {
+                .OnComplete(() =>
+                {
                     victoryCanvasGroup.blocksRaycasts = false;
                     victoryCanvasGroup.interactable = false;
                     victoryUI.SetActive(false);
@@ -220,7 +224,7 @@ public class SceneManager : MonoBehaviour
             isVictoryUIActive = false;
         }
     }
-    
+
     public void HideDeathUI()
     {
         if (!isDeathUIActive)
@@ -229,24 +233,25 @@ public class SceneManager : MonoBehaviour
                 Debug.Log("Death UI not active, ignoring HideDeathUI call");
             return;
         }
-        
+
         HideVictoryUIAnimation();
     }
-    
+
     private void HideDeathUIAnimation()
     {
         if (debugMode)
             Debug.Log("Hiding death UI");
-        
+
         if (deathCanvasGroup != null)
         {
             deathCanvasGroup.DOFade(0f, deathUIFadeDuration)
-                .OnComplete(() => {
+                .OnComplete(() =>
+                {
                     deathCanvasGroup.blocksRaycasts = false;
                     deathCanvasGroup.interactable = false;
                     deathUI.SetActive(false);
                     isDeathUIActive = false;
-                    
+
                     if (debugMode)
                         Debug.Log("Death UI hidden");
                 });
@@ -256,7 +261,7 @@ public class SceneManager : MonoBehaviour
             isDeathUIActive = false;
         }
     }
-    
+
     public void LoadNextLevel(bool changeScene = true)
     {
         if (isTransitioning)
@@ -265,9 +270,9 @@ public class SceneManager : MonoBehaviour
                 Debug.Log("Already transitioning, ignoring LoadNextLevel call");
             return;
         }
-        
+
         int nextLevelIndex = currentLevelIndex + 1;
-        
+
         if (nextLevelIndex < levelScenes.Length)
         {
             TransitionToLevel(nextLevelIndex, changeScene);
@@ -279,7 +284,7 @@ public class SceneManager : MonoBehaviour
             TransitionToMainMenu();
         }
     }
-    
+
     public void LoadLevel(int levelIndex)
     {
         if (isTransitioning)
@@ -288,7 +293,7 @@ public class SceneManager : MonoBehaviour
                 Debug.Log("Already transitioning, ignoring LoadLevel call");
             return;
         }
-        
+
         if (levelIndex >= 0 && levelIndex < levelScenes.Length)
         {
             TransitionToLevel(levelIndex);
@@ -298,7 +303,7 @@ public class SceneManager : MonoBehaviour
             Debug.LogError($"Invalid level index: {levelIndex}. Valid range: 0-{levelScenes.Length - 1}");
         }
     }
-    
+
     public void RestartCurrentLevel()
     {
         if (isTransitioning)
@@ -307,15 +312,15 @@ public class SceneManager : MonoBehaviour
                 Debug.Log("Already transitioning, ignoring RestartCurrentLevel call");
             return;
         }
-        
+
         if (isDeathUIActive)
         {
             HideDeathUI();
         }
-        
+
         TransitionToLevel(currentLevelIndex);
     }
-    
+
     public void LoadMainMenu()
     {
         if (isTransitioning)
@@ -324,35 +329,42 @@ public class SceneManager : MonoBehaviour
                 Debug.Log("Already transitioning, ignoring LoadMainMenu call");
             return;
         }
-        
+
         TransitionToMainMenu();
     }
-    
+
     private void TransitionToLevel(int levelIndex, bool changeScene = true)
     {
         isTransitioning = true;
-        
+
         if (debugMode)
             Debug.Log($"Transitioning to level {levelIndex}: {levelScenes[levelIndex]}");
-        
+
         // Create DOTween sequence for transition
         Sequence transitionSequence = DOTween.Sequence();
-        
+
         // Add transition delay
         transitionSequence.AppendInterval(transitionDelay);
-        
+
         // Add fade out
-        transitionSequence.AppendCallback(() => FadeOut(() => {
+        transitionSequence.AppendCallback(() => FadeOut(() =>
+        {
             // Load the scene after fade out completes
-            currentLevelIndex = levelIndex;
-            if(changeScene) UnityEngine.SceneManagement.SceneManager.LoadScene(levelScenes[levelIndex]);
-            
-            
-            
+            if (changeScene)
+            {
+                currentLevelIndex = levelIndex;
+                UnityEngine.SceneManagement.SceneManager.LoadScene(levelScenes[levelIndex]);
+            }
+
+
+
             // Fade in after scene loads (small delay for scene initialization)
-            DOVirtual.DelayedCall(0.1f, () => {
-                FadeIn(() => {
+            DOVirtual.DelayedCall(0.1f, () =>
+            {
+                FadeIn(() =>
+                {
                     isTransitioning = false;
+                    
                     BattleController.Instance.SetCurrentGameIndex(levelIndex);
                     BattleController.Instance.InitializeCombat(levelIndex % 2 + 1);
                     if (debugMode)
@@ -361,51 +373,55 @@ public class SceneManager : MonoBehaviour
             });
         }));
     }
-    
+
     private void TransitionToMainMenu()
     {
         isTransitioning = true;
-        
+
         if (debugMode)
             Debug.Log("Transitioning to main menu");
-        
+
         // Create DOTween sequence for transition
         Sequence transitionSequence = DOTween.Sequence();
-        
+
         // Add transition delay
         transitionSequence.AppendInterval(transitionDelay);
-        
+
         // Add fade out
-        transitionSequence.AppendCallback(() => FadeOut(() => {
+        transitionSequence.AppendCallback(() => FadeOut(() =>
+        {
             // Load main menu after fade out completes
             currentLevelIndex = 0;
             UnityEngine.SceneManagement.SceneManager.LoadScene(mainMenuScene);
-            
+
             // Fade in after scene loads (small delay for scene initialization)
-            DOVirtual.DelayedCall(0.1f, () => {
-                FadeIn(() => {
+            DOVirtual.DelayedCall(0.1f, () =>
+            {
+                FadeIn(() =>
+                {
                     isTransitioning = false;
-                    
+
                     if (debugMode)
                         Debug.Log("Successfully loaded main menu");
                 });
             });
         }));
     }
-    
+
     private void FadeOut(System.Action onComplete = null)
     {
         if (fadePanel != null)
         {
             fadePanel.blocksRaycasts = true;
             fadePanel.interactable = false;
-            
+
             fadePanel.DOFade(1f, fadeDuration)
                 .SetEase(fadeEaseOut)
-                .OnComplete(() => {
+                .OnComplete(() =>
+                {
                     if (debugMode)
                         Debug.Log("Fade out completed");
-                    
+
                     onComplete?.Invoke();
                 });
         }
@@ -414,20 +430,21 @@ public class SceneManager : MonoBehaviour
             onComplete?.Invoke();
         }
     }
-    
+
     private void FadeIn(System.Action onComplete = null)
     {
         if (fadePanel != null)
         {
             fadePanel.DOFade(0f, fadeDuration)
                 .SetEase(fadeEaseIn)
-                .OnComplete(() => {
+                .OnComplete(() =>
+                {
                     fadePanel.blocksRaycasts = false;
                     fadePanel.interactable = true;
-                    
+
                     if (debugMode)
                         Debug.Log("Fade in completed");
-                    
+
                     onComplete?.Invoke();
                 });
         }
@@ -436,23 +453,23 @@ public class SceneManager : MonoBehaviour
             onComplete?.Invoke();
         }
     }
-    
+
     public void OnLevelCompleted()
     {
         if (debugMode)
             Debug.Log("Level completed! Preparing to load next level...");
-        
+
         LoadNextLevel();
     }
-    
+
     public void OnPlayerDeath()
     {
         if (debugMode)
             Debug.Log("Player died! Showing death UI...");
-        
+
         ShowDeathUI();
     }
-    
+
     void OnDestroy()
     {
         if (Instance == this)

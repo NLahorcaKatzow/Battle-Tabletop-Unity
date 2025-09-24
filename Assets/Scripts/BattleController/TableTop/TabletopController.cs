@@ -61,6 +61,7 @@ public class TabletopController : MonoBehaviour
         }
         
         tabletopUI.InitializateUI(savedPositions, enemyPositions);
+        tabletopUI.InitializatePickUps(1);
     }
 
     public void SetTurn(int turn)
@@ -271,6 +272,7 @@ public class TabletopController : MonoBehaviour
         }
         currentPiecesInTabletop.Clear();
         tabletopUI.HideTabletop();
+        tabletopUI.ClearPickUps();
     }
 
 

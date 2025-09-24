@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "name": "Small Health Potion",
+    "healAmount": 25,
+    "rarity": 0,
+    "description": "A basic healing potion that restores 25 health points instantly."
+  },
+  {
+    "id": 2,
+    "name": "Medium Health Potion",
+    "healAmount": 50,
+    "rarity": 1,
+    "description": "A moderate healing potion that restores 50 health points instantly."
+  },
+  {
+    "id": 3,
+    "name": "Large Health Potion",
+    "healAmount": 100,
+    "rarity": 2,
+    "description": "A powerful healing potion that restores 100 health points instantly."
+  },
+  {
+    "id": 4,
+    "name": "Regeneration Elixir",
+    "healAmount": 75,
+    "rarity": 2,
+    "description": "A magical elixir that heals 75 health points."
+  },
+  {
+    "id": 5,
+    "name": "Phoenix Feather",
+    "healAmount": 150,
+    "rarity": 3,
+    "description": "A legendary phoenix feather that completely restores health instantly."
+  },
+  {
+    "id": 6,
+    "name": "First Aid Kit",
+    "healAmount": 30,
+    "rarity": 0,
+    "description": "A reusable first aid kit that heals 30 health points."
+  }
+]

@@ -1,5 +1,4 @@
 using DG.Tweening;
-using Unity.Android.Gradle.Manifest;
 using UnityEngine;
 using DamageNumbersPro;
 using UnityEngine.Events;
@@ -56,12 +55,13 @@ public class PieceController : MonoBehaviour, IDamageable
 
     public void MoveToPosition(Vector2Int newPosition, UnityAction onComplete = null, float easeTime = 0.5f)
     {
+        SetMovementBool(true);
         transform.DOMove(TabletopController.Instance.GetGrid()
         .GetCellCenterWorld(new Vector3Int(newPosition.x, 0, newPosition.y)), easeTime)
         .SetEase(Ease.InOutSine).OnComplete(() =>
         {
             SetPosition(newPosition);
-            SetMovementBool(true);
+
             Deselect();
             onComplete?.Invoke();
         });
@@ -136,13 +136,13 @@ public class PieceController : MonoBehaviour, IDamageable
 
         Debug.Log("PieceController: Healing for: " + amount);
         currentHealth += amount;
-        
+
         // Cap health at max health
         if (currentHealth > pieceData.maxHealth)
         {
             currentHealth = pieceData.maxHealth;
         }
-        
+
         damageSlider.transform.parent.gameObject.SetActive(true);
         damageSlider.value = (float)currentHealth / (float)pieceData.maxHealth;
 
@@ -165,7 +165,7 @@ public class PieceController : MonoBehaviour, IDamageable
     {
         currentHealth = pieceData.maxHealth;
         damageSlider.value = 1.0f;
-        
+
         transform.DOScale(1, 0.5f).SetEase(Ease.InOutSine);
     }
 

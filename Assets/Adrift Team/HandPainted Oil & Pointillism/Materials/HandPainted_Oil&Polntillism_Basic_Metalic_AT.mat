@@ -66,10 +66,10 @@ Material:
     - _QueueOffset: 0
     - _Roughness_Intensity: 1
     m_Colors:
-    - _Dark_Color: {r: 0, g: 0, b: 0, a: 1}
+    - _Dark_Color: {r: 0.14117648, g: 0.12941177, b: 0.10196079, a: 1}
     - _Emissive_Color: {r: 16, g: 7.084017, b: 0, a: 0}
-    - _Light_Color: {r: 0.8301887, g: 0.8301887, b: 0.8301887, a: 1}
-    - _Mid_Color: {r: 0.3018868, g: 0.3018868, b: 0.3018868, a: 1}
+    - _Light_Color: {r: 0.8301887, g: 0.84705883, b: 0.8784314, a: 1}
+    - _Mid_Color: {r: 0.14117648, g: 0.12941177, b: 0.101960786, a: 1}
     - _Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Tiling: {r: 5, g: 5, b: 0, a: 0}
   m_BuildTextureStacks: []

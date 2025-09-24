@@ -15,6 +15,10 @@ public class TabletopUI : BaseController
     [SerializeField] private GameObject actionCellPrefab;
     [SerializeField] private GameObject pieceInfoPanel;
     [SerializeField] private GameObject pieceActionsPanel;
+    
+    [SerializeField] private GameObject pickUpPrefab;
+    
+    
     [SerializeField] private Button moveButton;
     [SerializeField] private Button attackButton;
     [SerializeField] private GameObject attackCellPrefab;
@@ -34,7 +38,7 @@ public class TabletopUI : BaseController
     Dictionary<Vector2Int, GameObject> actionCells = new Dictionary<Vector2Int, GameObject>();
     Dictionary<Vector2Int, GameObject> attackCells = new Dictionary<Vector2Int, GameObject>();
     [SerializeField] private PieceController currentPiece;
-    
+    [SerializeField] private Dictionary<Vector2Int, GameObject> pickUpGOs = new Dictionary<Vector2Int, GameObject>();
     
     
     
@@ -75,6 +79,40 @@ public class TabletopUI : BaseController
         InitializeTimer();
     }
     
+    public void InitializatePickUps(int amount = 0){
+        var pickUps = ResourceController.Instance.GetHealthPickUps();
+        for(int i = 0; i < amount; i++){
+        
+            var randomPosition = GetRandomPosition();
+            var pickUpGO = Instantiate(pickUpPrefab, grid.GetCellCenterWorld(
+            new Vector3Int(randomPosition.x, 0, randomPosition.y)), Quaternion.identity, grid.transform);
+            pickUpGO.transform.position = new Vector3(pickUpGO.transform.position.x, 1.45f, pickUpGO.transform.position.z);
+            pickUpGO.GetComponent<HealthPickUp>().SetPickUpData(pickUps[Random.Range(0, pickUps.Count)]);
+            pickUpGOs.Add(randomPosition, pickUpGO);
+        }
+    }
+
+    public void ClearPickUps()
+    {
+        foreach(var pickUp in pickUpGOs.Values)
+        {
+            Destroy(pickUp);
+        }
+        pickUpGOs.Clear();
+        Debug.Log("ClearPickUps: " + pickUpGOs.Count);
+    }
+
+    private Vector2Int GetRandomPosition()
+    {
+        List<Vector2Int> positions = new List<Vector2Int>();
+        for(int i = 0; i < 5; i++){
+            for(int j = 0; j < 5; j++){
+                if(TabletopController.Instance.IsPositionEmpty(new Vector2Int(i, j))) positions.Add(new Vector2Int(i, j));
+            }
+        }
+        return positions[Random.Range(0, positions.Count)];
+    }
+
     [Button]
     public void DebugGrid(){
         for(int x = 0; x < 5; x++){
